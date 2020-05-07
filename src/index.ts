@@ -51,7 +51,8 @@ const makeTopLabels = (columnWidths: number[]): string => {
   const labels = columnWidths.map((width, colIdx) => {
     const letter = idxToLetter(colIdx);
     const padding = " ".repeat(width - letter.length);
-    return ` ${letter}${padding}`;
+    const isLast = colIdx === columnWidths.length - 1;
+    return isLast ? ` ${letter}` : ` ${letter}${padding}`;
   })
   const labelRow = "  #" + labels.join(' ');;
   return `${labelRow}\n`;
@@ -69,10 +70,10 @@ const formatDataAttribute = (data: Data): string => {
       const valueString = cellToString(cell);
       const width = columnWidths[cellIdx];
       const padding = " ".repeat(width - valueString.length);
-    return `${valueString},${padding}`;
+      const isLast = cellIdx === row.length - 1;
+      return isLast ? `${valueString}${padding}` : `${valueString},${padding}`;
     }).join(" ");
-    const rowStringNoTrailing = rowAsString.slice(0, -1);
-    outString += `  [ ${rowStringNoTrailing } ], # ${rowIdx + 1}\n`;
+    outString += `  [ ${rowAsString } ], # ${rowIdx + 1}\n`;
   });
 
   outString += "]\n";

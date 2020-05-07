@@ -26,9 +26,8 @@ tests.forEach(testName => {
   } else {
     console.error(`### Test failed, expected:
 ${expectedString}
-
 ### But recieved:
-${result} `);
+${result}`);
   }
 });
 
