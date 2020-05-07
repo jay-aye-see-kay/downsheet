@@ -17,19 +17,29 @@ const getColumnCount = (data: Data): number => {
 const cellToString = (cell: Cell): string => {
   switch(typeof cell) {
     case 'string':
-      return cell;
+      return `"${cell}"`;
     case 'number':
       return cell.toString();
+    case 'undefined':
+      return "";
     default:
       throw new Error();
   }
 }
 
 
-const getColumnWidths = (data: Data) =>
-  data.map(row =>
-    Math.max(...row.map(cell => cellToString(cell).length))
-  )
+const getColumnWidths = (data: Data, columnCount: number) => {
+  const columnMaxWidths = [];
+  for (let columnIdx = 0; columnIdx < columnCount - 1; columnIdx++) {
+    const columnWidths = [];
+    for (let rowIdx = 0; rowIdx < data.length; rowIdx++) {
+      const cell = data[rowIdx][columnIdx];
+      columnWidths.push(cellToString(cell).length);
+    }
+    columnMaxWidths.push(Math.max(...columnWidths));
+  }
+  return columnMaxWidths;
+}
 
 
 // TODO handle more than 26 cols
@@ -50,13 +60,19 @@ const makeTopLabels = (columnWidths: number[]): string => {
 
 const formatDataAttribute = (data: Data): string => {
   const columnCount = getColumnCount(data);
-  const columnWidths = getColumnWidths(data);
+  const columnWidths = getColumnWidths(data, columnCount);
 
   let outString = "data = [\n";
   outString += makeTopLabels(columnWidths);
   data.forEach((row, rowIdx) => {
-    const rowAsString = row.map(cell => cellToString(cell)).join(", ");
-    outString += `  [ ${rowAsString} ], # ${rowIdx + 1}\n`;
+    const rowAsString = row.map((cell, cellIdx) => {
+      const valueString = cellToString(cell);
+      const width = columnWidths[cellIdx];
+      const padding = " ".repeat(width - valueString.length);
+    return `${valueString},${padding}`;
+    }).join(" ");
+    const rowStringNoTrailing = rowAsString.slice(0, -1);
+    outString += `  [ ${rowStringNoTrailing } ], # ${rowIdx + 1}\n`;
   });
 
   outString += "]\n";
