@@ -58,14 +58,27 @@ const makeTopLabels = (columnWidths: number[]): string => {
   return `${labelRow}\n`;
 }
 
+const padRows = (data: Data): Data => {
+  const maxColLength = Math.max(...data.map(row => row.length));
+  const newData = data.map(row => {
+    const newRow = [...row];
+    while (newRow.length < maxColLength) {
+      newRow.push("");
+    }
+    return newRow;
+  });
+  return newData;
+}
+
 
 const formatDataAttribute = (data: Data): string => {
   const columnCount = getColumnCount(data);
-  const columnWidths = getColumnWidths(data, columnCount);
+  const paddedData = padRows(data);
+  const columnWidths = getColumnWidths(paddedData, columnCount);
 
   let outString = "data = [\n";
   outString += makeTopLabels(columnWidths);
-  data.forEach((row, rowIdx) => {
+  paddedData.forEach((row, rowIdx) => {
     const rowAsString = row.map((cell, cellIdx) => {
       const valueString = cellToString(cell);
       const width = columnWidths[cellIdx];
