@@ -5,13 +5,16 @@
   "main": "index.js",
   "scripts": {
     "start": "ts-node ./src/index.ts",
+    "mocha": "mocha",
     "test": "ts-node ./testRunner.ts"
   },
   "keywords": [],
   "author": "Jack Rose",
   "license": "ISC",
   "devDependencies": {
+    "@types/mocha": "^7.0.2",
     "@types/node": "^13.13.5",
+    "mocha": "^7.1.2",
     "nodemon": "^2.0.3",
     "ts-node": "^8.10.1",
     "typescript": "^3.8.3"
