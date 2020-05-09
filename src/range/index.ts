@@ -43,14 +43,14 @@ type Position = string;
 // Coord is [0, 0] syntax, 0 indexed
 type Coord = [number, number];
 
-type Cell = {
+export type Cell = {
   kind: CellKind;
   value: any; // TODO
 };
 
 type SheetArray = Cell[];
 type SheetMatrix = Cell[][];
-type SheetData = SheetMatrix;
+export type SheetData = SheetMatrix;
 
 class RangeError extends Error {}
 
@@ -103,8 +103,18 @@ const resolve = (rangeString: string, sheetData: SheetData): Cell | SheetArray |
    || kind === 'column matrix'
    ) { /* TODO handle unbounded range */ }
 
+   if (kind === 'cell') {
+     const coord = positionToCoord(rangeString);
+     return sheetData[coord[0]][coord[1]];
+   }
+
    return sheetData;
 }
 
 
-export const Range = { kind, positionToCoord, columnStringToIndex };
+export const Range = {
+  kind,
+  positionToCoord,
+  columnStringToIndex,
+  resolve
+};

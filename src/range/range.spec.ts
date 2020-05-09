@@ -1,6 +1,6 @@
 import { equal, deepStrictEqual } from "assert";
 
-import { Range } from "./index";
+import { Range, SheetData, Cell } from "./index";
 
 
 describe('Range module', () => {
@@ -53,6 +53,15 @@ describe('Range module', () => {
     });
     it('should handle a position at BA1000', () => {
       deepStrictEqual(Range.positionToCoord('BA1000'), [52, 999]);
+    });
+  });
+
+  describe('resolve()', () => {
+    const cell1: Cell = { kind: 'float', value: 1 };
+    const sheetData: SheetData = [ [cell1] ];
+
+    it('should handle a simple position a A1', () => {
+      deepStrictEqual(Range.resolve('A1', sheetData), cell1);
     });
   });
 });
