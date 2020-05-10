@@ -79,3 +79,14 @@ export type SheetArray = Cell[];
 export type SheetMatrix = Cell[][];
 // same as matrix but represents all the data
 export type SheetData = SheetMatrix;
+
+export type RangeIO = Cell | SheetArray | SheetMatrix;
+
+export const isCell = (r: RangeIO): r is Cell =>
+  !Array.isArray(r);
+
+export const isSheetArray = (r: RangeIO): r is SheetArray =>
+  Array.isArray(r) && !Array.isArray(r[0]);
+
+export const isSheetMatrix = (r: RangeIO): r is SheetMatrix =>
+  Array.isArray(r) && Array.isArray(r[0]);
