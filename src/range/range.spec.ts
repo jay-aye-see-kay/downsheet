@@ -4,21 +4,21 @@ import { Range, SheetData, Cell } from "./index";
 
 
 describe('Range module', () => {
-  describe('kind()', () => {
+  describe('getKind()', () => {
     it('should return invalid with no input', () => {
-      equal(Range.kind(''), 'invalid');
+      equal(Range.getKind(''), 'invalid');
     });
     it('should return true for a cell', () => {
-      equal(Range.kind('A1'), 'cell');
+      equal(Range.getKind('A1'), 'cell');
     });
     it('should return array for an array', () => {
-      equal(Range.kind('A1:A3'), 'array');
+      equal(Range.getKind('A1:A3'), 'array');
     });
     it('should return row for a row', () => {
-      equal(Range.kind('1:1'), 'row');
+      equal(Range.getKind('1:1'), 'row');
     });
     it('should return column for a column', () => {
-      equal(Range.kind('A:A'), 'column');
+      equal(Range.getKind('A:A'), 'column');
     });
   });
 
@@ -46,22 +46,38 @@ describe('Range module', () => {
 
   describe('positionToCoord()', () => {
     it('should handle a simple position a A1', () => {
-      deepStrictEqual(Range.positionToCoord('A1'), [0, 0]);
+      deepStrictEqual(Range.positionToCoord('A1'), { col: 0, row: 0 });
     });
     it('should handle a position at Z99', () => {
-      deepStrictEqual(Range.positionToCoord('Z99'), [25, 98]);
+      deepStrictEqual(Range.positionToCoord('Z99'), { col: 25, row: 98 });
     });
     it('should handle a position at BA1000', () => {
-      deepStrictEqual(Range.positionToCoord('BA1000'), [52, 999]);
+      deepStrictEqual(Range.positionToCoord('BA1000'), { col: 52, row: 999 });
     });
   });
 
   describe('resolve()', () => {
     const cell1: Cell = { kind: 'float', value: 1 };
-    const sheetData: SheetData = [ [cell1] ];
+    const cell2: Cell = { kind: 'string', value: "foo" };
+    const cell3: Cell = { kind: 'string', value: "bar" };
+    const sheetData: SheetData = [
+    // A      B      C
+      [cell1, cell2, cell3], // 1
+      [cell2, cell1, cell2], // 2
+      [cell3, cell2, cell1], // 3
+    ];
 
-    it('should handle a simple position a A1', () => {
+    it('should resolve a simple position a A1', () => {
       deepStrictEqual(Range.resolve('A1', sheetData), cell1);
+    });
+    it('should resolve a horizontal 1D array A1:C1', () => {
+      deepStrictEqual(Range.resolve('A1:C1', sheetData), [cell1, cell2, cell3]);
+    });
+    it('should resolve a vertical 1D array B1:B3', () => {
+      deepStrictEqual(Range.resolve('B1:B3', sheetData), [cell2, cell1, cell2]);
+    });
+    it('should resolve a matrix A1:B2', () => {
+      deepStrictEqual(Range.resolve('A1:B2', sheetData), [[cell1, cell2],[cell2, cell1]]);
     });
   });
 });
