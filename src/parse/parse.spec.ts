@@ -2,8 +2,7 @@ import { strict as a } from "assert"
 import Toml from '@iarna/toml';
 
 import { parse, convertCell } from './index';
-import { Cell } from '../types';
-import { OffsetDateTime, LocalDateTime, LocalDate, LocalTime } from '../dates';
+import { Cell, OffsetDateTime, LocalDateTime, LocalDate, LocalTime } from '../types';
 
 
 // https://github.com/iarna/iarna-toml/blob/latest/lib/create-datetime.js

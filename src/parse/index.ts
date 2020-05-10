@@ -9,7 +9,7 @@ import {
   LocalDateTime,
   LocalDate,
   LocalTime,
-} from '../dates';
+} from '../types';
 import { Cell, SheetData } from '../types';
 
 
