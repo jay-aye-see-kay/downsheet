@@ -1,4 +1,4 @@
-import { equal, deepStrictEqual } from "assert";
+import { strict as a } from "assert"
 
 import { Range, SheetData, Cell } from "./index";
 
@@ -6,54 +6,54 @@ import { Range, SheetData, Cell } from "./index";
 describe('Range module', () => {
   describe('getKind()', () => {
     it('should return invalid with no input', () => {
-      equal(Range.getKind(''), 'invalid');
+      a.equal(Range.getKind(''), 'invalid');
     });
     it('should return true for a cell', () => {
-      equal(Range.getKind('A1'), 'cell');
+      a.equal(Range.getKind('A1'), 'cell');
     });
     it('should return matrix for an array', () => {
-      equal(Range.getKind('A1:A3'), 'matrix');
-      equal(Range.getKind('A1:C1'), 'matrix');
+      a.equal(Range.getKind('A1:A3'), 'matrix');
+      a.equal(Range.getKind('A1:C1'), 'matrix');
     });
     it('should return row for a row', () => {
-      equal(Range.getKind('1:1'), 'row');
+      a.equal(Range.getKind('1:1'), 'row');
     });
     it('should return column for a column', () => {
-      equal(Range.getKind('A:A'), 'column');
+      a.equal(Range.getKind('A:A'), 'column');
     });
   });
 
   describe('columnStringToIndex()', () => {
     it('should convert A to 0', () => {
-      equal(Range.columnStringToIndex('A'), 0);
+      a.equal(Range.columnStringToIndex('A'), 0);
     });
     it('should convert Z to 25', () => {
-      equal(Range.columnStringToIndex('Z'), 25);
+      a.equal(Range.columnStringToIndex('Z'), 25);
     });
     it('should convert AA to 26', () => {
-      equal(Range.columnStringToIndex('AA'), 26);
+      a.equal(Range.columnStringToIndex('AA'), 26);
     });
     it('should convert AZ to 51', () => {
-      equal(Range.columnStringToIndex('AZ'), 51);
+      a.equal(Range.columnStringToIndex('AZ'), 51);
     });
     it('should convert ZZ to 701', () => {
-      equal(Range.columnStringToIndex('ZZ'), 701);
+      a.equal(Range.columnStringToIndex('ZZ'), 701);
     });
     it('should also handle lower case', () => {
-      equal(Range.columnStringToIndex('a'), 0);
-      equal(Range.columnStringToIndex('zz'), 701);
+      a.equal(Range.columnStringToIndex('a'), 0);
+      a.equal(Range.columnStringToIndex('zz'), 701);
     });
   });
 
   describe('positionToCoord()', () => {
     it('should handle a simple position a A1', () => {
-      deepStrictEqual(Range.positionToCoord('A1'), { col: 0, row: 0 });
+      a.deepEqual(Range.positionToCoord('A1'), { col: 0, row: 0 });
     });
     it('should handle a position at Z99', () => {
-      deepStrictEqual(Range.positionToCoord('Z99'), { col: 25, row: 98 });
+      a.deepEqual(Range.positionToCoord('Z99'), { col: 25, row: 98 });
     });
     it('should handle a position at BA1000', () => {
-      deepStrictEqual(Range.positionToCoord('BA1000'), { col: 52, row: 999 });
+      a.deepEqual(Range.positionToCoord('BA1000'), { col: 52, row: 999 });
     });
   });
 
@@ -69,34 +69,34 @@ describe('Range module', () => {
     ];
 
     it('should resolve a simple position a A1', () => {
-      deepStrictEqual(Range.resolve('A1', sheetData), cell1);
+      a.deepEqual(Range.resolve('A1', sheetData), cell1);
     });
     it('should resolve a horizontal 1D array A1:C1', () => {
-      deepStrictEqual(Range.resolve('A1:C1', sheetData), [cell1, cell2, cell3]);
+      a.deepEqual(Range.resolve('A1:C1', sheetData), [cell1, cell2, cell3]);
     });
     it('should resolve a vertical 1D array B1:B3', () => {
-      deepStrictEqual(Range.resolve('B1:B3', sheetData), [cell2, cell1, cell2]);
+      a.deepEqual(Range.resolve('B1:B3', sheetData), [cell2, cell1, cell2]);
     });
     it('should resolve a matrix A1:B2', () => {
-      deepStrictEqual(Range.resolve('A1:B2', sheetData), [
+      a.deepEqual(Range.resolve('A1:B2', sheetData), [
         [cell1, cell2],
         [cell2, cell1],
       ]);
     });
     it('should resolve a row 1:1', () => {
-      deepStrictEqual(Range.resolve('1:1', sheetData), [cell1, cell2, cell3]);
+      a.deepEqual(Range.resolve('1:1', sheetData), [cell1, cell2, cell3]);
     });
     it('should resolve an multiple rows 1:2', () => {
-      deepStrictEqual(Range.resolve('1:2', sheetData), [
+      a.deepEqual(Range.resolve('1:2', sheetData), [
         [cell1, cell2, cell3],
         [cell2, cell1, cell2],
       ]);
     });
     it('should resolve a column B:B', () => {
-      deepStrictEqual(Range.resolve('B:B', sheetData), [cell2, cell1, cell2]);
+      a.deepEqual(Range.resolve('B:B', sheetData), [cell2, cell1, cell2]);
     });
     it('should resolve an multiple columns A:B', () => {
-      deepStrictEqual(Range.resolve('A:B', sheetData), [
+      a.deepEqual(Range.resolve('A:B', sheetData), [
         [cell1, cell2],
         [cell2, cell1],
         [cell3, cell2],
