@@ -89,6 +89,28 @@ const positionToCoord = (position: Position): Coord => {
   return { row: rowIndex, col: columnIndex };
 }
 
+const rowToCoords = (rangeString: string, sheetData: SheetData): [Coord, Coord] => {
+  const [row1, row2] = rangeString.split(':');
+  const rowIndex1 = parseInt(row1, 10) - 1;
+  const rowIndex2 = parseInt(row2, 10) - 1;
+  const lastColIndex = sheetData[0].length - 1;
+  return [
+    { row: rowIndex1, col: 0 },
+    { row: rowIndex2, col: lastColIndex },
+  ];
+}
+
+const colToCoords = (rangeString: string, sheetData: SheetData): [Coord, Coord] => {
+  const [col1, col2] = rangeString.split(':');
+  const colIndex1 = columnStringToIndex(col1);
+  const colIndex2 = columnStringToIndex(col2);
+  const lastRowIndex = sheetData.length - 1;
+  return [
+    { row: 0, col: colIndex1 },
+    { row: lastRowIndex, col: colIndex2 },
+  ];
+}
+
 const getMatrix = (c1: Coord, c2: Coord, sheetData: SheetData): SheetMatrix => {
   const [rMin, rMax] = [c1.row, c2.row].sort();
   const [cMin, cMax] = [c1.col, c2.col].sort();
@@ -106,25 +128,40 @@ const resolve = (rangeString: string, sheetData: SheetData): Cell | SheetArray |
   switch (kind) {
     case 'invalid':
       throw new RangeError();
-    case 'row':
-    case 'column':
-      throw new Error('TODO handle unbounded ranges');
 
-    case 'cell':
-     const coord = positionToCoord(rangeString);
-     return sheetData[coord.row][coord.col];
+    case 'row': {
+      const [coord1, coord2] = rowToCoords(rangeString, sheetData);
+      const matrix = getMatrix(coord1, coord2, sheetData);
+      return isSingleRow(matrix)
+        ? matrix[0]
+        : matrix;
+    }
 
-     case 'matrix':
-       const [pos1, pos2] = rangeString.split(':');
-       const coord1 = positionToCoord(pos1);
-       const coord2 = positionToCoord(pos2);
-       const matrix = getMatrix(coord1, coord2, sheetData);
-       if (isSingleRow(matrix)) {
-         return matrix[0];
-       } else if (isSingleCol(matrix)) {
-         return matrix.map(row => row[0]);
-       }
-       return matrix
+    case 'column': {
+      const [coord1, coord2] = colToCoords(rangeString, sheetData);
+      const matrix = getMatrix(coord1, coord2, sheetData);
+      return isSingleCol(matrix)
+        ? matrix.map(row => row[0])
+        : matrix;
+    }
+
+    case 'cell': {
+      const coord = positionToCoord(rangeString);
+      return sheetData[coord.row][coord.col];
+    }
+
+    case 'matrix': {
+      const [pos1, pos2] = rangeString.split(':');
+      const coord1 = positionToCoord(pos1);
+      const coord2 = positionToCoord(pos2);
+      const matrix = getMatrix(coord1, coord2, sheetData);
+      if (isSingleRow(matrix)) {
+        return matrix[0];
+      } else if (isSingleCol(matrix)) {
+        return matrix.map(row => row[0]);
+      }
+      return matrix
+    }
 
     default:
       assertNever(kind);

@@ -78,7 +78,29 @@ describe('Range module', () => {
       deepStrictEqual(Range.resolve('B1:B3', sheetData), [cell2, cell1, cell2]);
     });
     it('should resolve a matrix A1:B2', () => {
-      deepStrictEqual(Range.resolve('A1:B2', sheetData), [[cell1, cell2],[cell2, cell1]]);
+      deepStrictEqual(Range.resolve('A1:B2', sheetData), [
+        [cell1, cell2],
+        [cell2, cell1],
+      ]);
+    });
+    it('should resolve a row 1:1', () => {
+      deepStrictEqual(Range.resolve('1:1', sheetData), [cell1, cell2, cell3]);
+    });
+    it('should resolve an multiple rows 1:2', () => {
+      deepStrictEqual(Range.resolve('1:2', sheetData), [
+        [cell1, cell2, cell3],
+        [cell2, cell1, cell2],
+      ]);
+    });
+    it('should resolve a column B:B', () => {
+      deepStrictEqual(Range.resolve('B:B', sheetData), [cell2, cell1, cell2]);
+    });
+    it('should resolve an multiple columns A:B', () => {
+      deepStrictEqual(Range.resolve('A:B', sheetData), [
+        [cell1, cell2],
+        [cell2, cell1],
+        [cell3, cell2],
+      ]);
     });
   });
 });
