@@ -17,7 +17,7 @@ const sheets: Record<string, SheetData> = {
 const expected = {
   oneSquare: `data = [
   # A
-  [ '' ], # 1
+  [ "" ], # 1
 ]
 `,
   identity: `data = [

@@ -2,8 +2,8 @@ import { strict as a } from "assert"
 import * as fs from 'fs';
 import * as path from 'path';
 
+import { stringify, parse } from '../index';
 
-import { formatDownsheet } from '../index';
 
 const testsPath = path.join(__dirname, './test-files');
 const tests = fs.readdirSync(testsPath);
@@ -20,7 +20,7 @@ describe('e2e formating tests', () => {
       a.ok(testInputPath);
       const inputString = fs.readFileSync(testInputPath, 'utf8');
 
-      const result = formatDownsheet(inputString);
+      const result = stringify(parse(inputString));
       a.equal(result, expected);
     });
   });

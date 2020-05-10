@@ -4,7 +4,7 @@ import { assertNever } from '../helpers';
 export const cellToString = (cell: Cell): string => {
   switch(cell.kind) {
     case 'none':
-      return `''`;
+      return `""`;
     case 'boolean':
       return cell.value ? "true" : "false";
     case 'string':
