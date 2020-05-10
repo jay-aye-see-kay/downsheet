@@ -2,33 +2,23 @@ const assertNever = (x: never): never => {
   throw new Error("Unexpected object: " + x);
 }
 
-
 const char = "([a-zA-Z])+";
 const num = "([0-9])+";
 
 const valid = {
   cell: new RegExp(`^${char}${num}$`),
-  array: new RegExp(`^${char}${num}:${char}${num}$`),
+  matrix: new RegExp(`^${char}${num}:${char}${num}$`),
   row: new RegExp(`^${num}:${num}$`),
   column: new RegExp(`^${char}:${char}$`),
 };
 
-type BoundedRangeKind =
-  | "cell"
-  | "array"
-  | "matrix"
-
-// needs to be resolved into a bounded range
-type UnboundedRangeKind =
-  | "row"
-  | "column"
-  | "row matrix"
-  | "column matrix";
-
 type RangeKind =
-  | BoundedRangeKind
-  | UnboundedRangeKind
+  | "cell"   // "A1"
+  | "matrix" // "A1:A3" or "A1:B3"
+  | "row"    // "1:1"
+  | "column" // "A:A"
   | "invalid";
+
 
 type CellKind =
   | 'none'
@@ -64,15 +54,13 @@ class RangeError extends Error {}
 
 
 const getKind = (rangeString: string): RangeKind => {
-  if (valid.cell.test(rangeString)) return 'cell';
-  if (valid.array.test(rangeString)) return 'array';
-  // TODO matrix vs array
-  if (valid.row.test(rangeString)) return 'row';
+  if (valid.cell.test(rangeString))   return 'cell';
+  if (valid.matrix.test(rangeString)) return 'matrix';
+  if (valid.row.test(rangeString))    return 'row';
   if (valid.column.test(rangeString)) return 'column';
-  // TODO row vs rows and column vs columns
-
   return 'invalid';
 }
+
 
 // this probably need better tests, I'm not confident it handles large numbers quite right
 const columnStringToIndex = (columnString: string): number => {
@@ -101,22 +89,6 @@ const positionToCoord = (position: Position): Coord => {
   return { row: rowIndex, col: columnIndex };
 }
 
-const getRowH = (rStart: number, rEnd: number, col: number, sheetData: SheetData): Cell[] => {
-  const slice: Cell[] = [];
-  for (let rIndex = rStart; rIndex <= rEnd; rIndex++) {
-    slice.push(sheetData[col][rIndex]);
-  }
-  return slice;
-}
-
-const getRowV = (cStart: number, cEnd: number, row: number, sheetData: SheetData): Cell[] => {
-  const slice: Cell[] = [];
-  for (let cIndex = cStart; cIndex <= cEnd; cIndex++) {
-    slice.push(sheetData[cIndex][row]);
-  }
-  return slice;
-}
-
 const getMatrix = (c1: Coord, c2: Coord, sheetData: SheetData): SheetMatrix => {
   const [rMin, rMax] = [c1.row, c2.row].sort();
   const [cMin, cMax] = [c1.col, c2.col].sort();
@@ -135,37 +107,33 @@ const resolve = (rangeString: string, sheetData: SheetData): Cell | SheetArray |
     case 'invalid':
       throw new RangeError();
     case 'row':
-    case 'row matrix':
     case 'column':
-    case 'column matrix':
-      throw new Error('TODO handle unbounded range');
+      throw new Error('TODO handle unbounded ranges');
 
     case 'cell':
      const coord = positionToCoord(rangeString);
      return sheetData[coord.row][coord.col];
 
-    case 'array': {
-      const [s1, s2] = rangeString.split(':');
-      const c1 = positionToCoord(s1);
-      const c2 = positionToCoord(s2);
-      if (c1.row ===c2.row) {
-        return getRowV(c1.col, c2.col, c1.row, sheetData)
-      } else {
-        return getRowH(c1.row, c2.row, c1.col, sheetData)
-      }
-    }
-
      case 'matrix':
-       const [s1, s2] = rangeString.split(':');
-       const c1 = positionToCoord(s1);
-       const c2 = positionToCoord(s2);
-       return getMatrix(c1, c2, sheetData);
+       const [pos1, pos2] = rangeString.split(':');
+       const coord1 = positionToCoord(pos1);
+       const coord2 = positionToCoord(pos2);
+       const matrix = getMatrix(coord1, coord2, sheetData);
+       if (isSingleRow(matrix)) {
+         return matrix[0];
+       } else if (isSingleCol(matrix)) {
+         return matrix.map(row => row[0]);
+       }
+       return matrix
 
     default:
       assertNever(kind);
       throw new Error();
   }
 }
+
+const isSingleRow = (matrix: SheetMatrix): boolean => matrix.length === 1;
+const isSingleCol = (matrix: SheetMatrix): boolean => matrix[0].length === 1;
 
 // okay what I really want of this modules is to pass in the sheet and a range string and get a resolved range object back with a kind key to id it, and a value of Cell | Cell[] | Cell[][]
 // the way I've split getKind off doesn't make that much sense right now, and the concept of unbounded ranges isn't really useful, the initial regex check should just split on cell, matrix (inc 1d array), row, and col

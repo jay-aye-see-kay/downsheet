@@ -11,8 +11,9 @@ describe('Range module', () => {
     it('should return true for a cell', () => {
       equal(Range.getKind('A1'), 'cell');
     });
-    it('should return array for an array', () => {
-      equal(Range.getKind('A1:A3'), 'array');
+    it('should return matrix for an array', () => {
+      equal(Range.getKind('A1:A3'), 'matrix');
+      equal(Range.getKind('A1:C1'), 'matrix');
     });
     it('should return row for a row', () => {
       equal(Range.getKind('1:1'), 'row');
