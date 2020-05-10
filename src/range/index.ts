@@ -1,14 +1,13 @@
-const assertNever = (x: never): never => {
-  throw new Error("Unexpected object: " + x);
-}
+import { assertNever } from '../helpers';
+
 
 const char = "([a-zA-Z])+";
 const num = "([0-9])+";
 
 const valid = {
-  cell: new RegExp(`^${char}${num}$`),
+  cell:   new RegExp(`^${char}${num}$`),
   matrix: new RegExp(`^${char}${num}:${char}${num}$`),
-  row: new RegExp(`^${num}:${num}$`),
+  row:    new RegExp(`^${num}:${num}$`),
   column: new RegExp(`^${char}:${char}$`),
 };
 
@@ -123,7 +122,7 @@ const getMatrix = (c1: Coord, c2: Coord, sheetData: SheetData): SheetMatrix => {
   return slicedData;
 }
 
-const resolve = (rangeString: string, sheetData: SheetData): Cell | SheetArray | SheetMatrix => {
+export const resolve = (rangeString: string, sheetData: SheetData): Cell | SheetArray | SheetMatrix => {
   const kind = getKind(rangeString);
   switch (kind) {
     case 'invalid':
@@ -172,11 +171,7 @@ const resolve = (rangeString: string, sheetData: SheetData): Cell | SheetArray |
 const isSingleRow = (matrix: SheetMatrix): boolean => matrix.length === 1;
 const isSingleCol = (matrix: SheetMatrix): boolean => matrix[0].length === 1;
 
-// okay what I really want of this modules is to pass in the sheet and a range string and get a resolved range object back with a kind key to id it, and a value of Cell | Cell[] | Cell[][]
-// the way I've split getKind off doesn't make that much sense right now, and the concept of unbounded ranges isn't really useful, the initial regex check should just split on cell, matrix (inc 1d array), row, and col
-// I also don't handle getting values from parts of the sheet that don't exist, I should probably throw and error there
-
-
+// most of these are just exported for testing, only resolve should be needed
 export const Range = {
   getKind,
   positionToCoord,
