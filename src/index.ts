@@ -1,4 +1,4 @@
-import { stringify } from './stringify';
-import { parse } from './parse';
+import * as fs from 'fs';
 
-export { stringify, parse };
+export { stringify } from './stringify';
+export { parse } from './parse';

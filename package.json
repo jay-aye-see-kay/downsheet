@@ -1,12 +1,15 @@
 {
-  "name": "simple-attempt",
-  "version": "1.0.0",
+  "name": "downsheet",
+  "version": "0.0.1",
   "description": "",
   "main": "index.js",
   "scripts": {
     "start": "ts-node ./src/index.ts",
     "mocha": "mocha",
-    "test": "ts-node ./testRunner.ts"
+    "devBuild": "tsc -p . && sudo npm link"
+  },
+  "bin": {
+    "dsc": "./cli.js"
   },
   "keywords": [],
   "author": "Jack Rose",
