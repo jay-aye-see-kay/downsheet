@@ -23,28 +23,6 @@ describe('Range module', () => {
     });
   });
 
-  describe('columnStringToIndex()', () => {
-    it('should convert A to 0', () => {
-      a.equal(Range.columnStringToIndex('A'), 0);
-    });
-    it('should convert Z to 25', () => {
-      a.equal(Range.columnStringToIndex('Z'), 25);
-    });
-    it('should convert AA to 26', () => {
-      a.equal(Range.columnStringToIndex('AA'), 26);
-    });
-    it('should convert AZ to 51', () => {
-      a.equal(Range.columnStringToIndex('AZ'), 51);
-    });
-    it('should convert ZZ to 701', () => {
-      a.equal(Range.columnStringToIndex('ZZ'), 701);
-    });
-    it('should also handle lower case', () => {
-      a.equal(Range.columnStringToIndex('a'), 0);
-      a.equal(Range.columnStringToIndex('zz'), 701);
-    });
-  });
-
   describe('positionToCoord()', () => {
     it('should handle a simple position a A1', () => {
       a.deepEqual(Range.positionToCoord('A1'), { col: 0, row: 0 });

@@ -1,5 +1,6 @@
 import { Cell, SheetData } from '../types';
 import { assertNever } from '../helpers';
+import { toSb26 } from '../hexavigesimal';
 
 export const cellToString = (cell: Cell): string => {
   switch(cell.kind) {
@@ -37,14 +38,9 @@ const getColumnWidths = (stringMatix: string[][]) => {
   return columnMaxWidths;
 }
 
-// TODO handle more than 26 cols
-const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split('');
-const idxToLetter = (i: number) => alphabet[i];
-
-
 const makeTopLabels = (columnWidths: number[]): string => {
   const labels = columnWidths.map((width, colIdx) => {
-    const letter = idxToLetter(colIdx);
+    const letter = toSb26(colIdx);
     const padding = " ".repeat(width - letter.length);
     const isLast = colIdx === columnWidths.length - 1;
     return isLast ? ` ${letter}` : ` ${letter}${padding}`;
@@ -70,7 +66,5 @@ export const stringify = (sheetData: SheetData): string => {
     }).join(" ");
     outString += `  [ ${rowAsString } ], # ${rowIdx + 1}\n`;
   });
-
-  outString += "]\n";
-  return outString;
+outString += "]\n"; return outString;
 }

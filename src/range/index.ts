@@ -1,4 +1,5 @@
 import { assertNever } from '../helpers';
+import { fromSb26 } from '../hexavigesimal';
 
 
 const char = "([a-zA-Z])+";
@@ -60,24 +61,10 @@ const getKind = (rangeString: string): RangeKind => {
   return 'invalid';
 }
 
-
-// this probably need better tests, I'm not confident it handles large numbers quite right
-const columnStringToIndex = (columnString: string): number => {
-  const charValue = columnString.toUpperCase().split('').reverse().map((char, index) => {
-    const digitValue = char.charCodeAt(0) - "A".charCodeAt(0) + 1;
-    if (digitValue < 1 && digitValue > 26) {
-      throw new Error('non-ascii alphabet column provided');
-    }
-    return digitValue * (26 ** index);
-  });
-  return charValue.reduce((sum, v) => sum + v, 0) - 1;
-}
-
-
 const positionToCoord = (position: Position): Coord => {
   const columnMatches = position.match(/[a-zA-Z]+/);
   const columnIndex = columnMatches && columnMatches[0] ?
-    columnStringToIndex(columnMatches[0])
+    fromSb26(columnMatches[0])
     : 0;
 
   const rowMatches = position.match(/[0-9]+/);
@@ -101,8 +88,8 @@ const rowToCoords = (rangeString: string, sheetData: SheetData): [Coord, Coord] 
 
 const colToCoords = (rangeString: string, sheetData: SheetData): [Coord, Coord] => {
   const [col1, col2] = rangeString.split(':');
-  const colIndex1 = columnStringToIndex(col1);
-  const colIndex2 = columnStringToIndex(col2);
+  const colIndex1 = fromSb26(col1);
+  const colIndex2 = fromSb26(col2);
   const lastRowIndex = sheetData.length - 1;
   return [
     { row: 0, col: colIndex1 },
@@ -175,6 +162,5 @@ const isSingleCol = (matrix: SheetMatrix): boolean => matrix[0].length === 1;
 export const Range = {
   getKind,
   positionToCoord,
-  columnStringToIndex,
   resolve
 };
