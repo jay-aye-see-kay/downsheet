@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "ts-node ./src/index.ts",
-    "mocha": "mocha",
+    "test": "mocha",
     "devBuild": "tsc -p . && sudo npm link"
   },
   "bin": {
