@@ -34,72 +34,56 @@ const CalculatorLexer = new Lexer(allTokens);
 // Note that this is a Pure grammar, it only describes the grammar
 // Not any actions (semantics) to perform during parsing.
 class CalculatorPure extends CstParser {
-  additionExpression: any;
-  multiplicationExpression: any;
-  atomicExpression: any;
-  parenthesisExpression: any;
-  powerFunction: any;
-  expression: any;
-
   constructor() {
     super(allTokens);
-
-    const $ = this;
-
-    $.RULE("expression", () => {
-      $.SUBRULE($.additionExpression)
-    });
-
-    //  lowest precedence thus it is first in the rule chain
-    // The precedence of binary expressions is determined by how far down the Parse Tree
-    // The binary expression appears.
-    $.RULE("additionExpression", () => {
-      $.SUBRULE($.multiplicationExpression, {LABEL: "lhs"});
-      $.MANY(() => {
-        // consuming 'AdditionOperator' will consume either Plus or Minus as they are subclasses of AdditionOperator
-        $.CONSUME(AdditionOperator);
-        //  the index "2" in SUBRULE2 is needed to identify the unique position in the grammar during runtime
-        $.SUBRULE2($.multiplicationExpression, {LABEL: "rhs"});
-      });
-    });
-
-    $.RULE("multiplicationExpression", () => {
-      $.SUBRULE($.atomicExpression, {LABEL: "lhs"});
-      $.MANY(() => {
-        $.CONSUME(MultiplicationOperator);
-        //  the index "2" in SUBRULE2 is needed to identify the unique position in the grammar during runtime
-        $.SUBRULE2($.atomicExpression, {LABEL: "rhs"});
-      });
-    });
-
-    $.RULE("atomicExpression", () => $.OR([
-      // parenthesisExpression has the highest precedence and thus it appears
-      // in the "lowest" leaf in the expression ParseTree.
-      {ALT: () => $.SUBRULE($.parenthesisExpression)},
-      {ALT: () => $.CONSUME(NumberLiteral)},
-      {ALT: () => $.SUBRULE($.powerFunction)}
-    ]));
-
-    $.RULE("parenthesisExpression", () => {
-      $.CONSUME(LParen);
-      $.SUBRULE($.expression);
-      $.CONSUME(RParen);
-    });
-
-    $.RULE("powerFunction", () => {
-      $.CONSUME(PowerFunc);
-      $.CONSUME(LParen);
-      $.SUBRULE($.expression, {LABEL: "base"});
-      $.CONSUME(Comma);
-      $.SUBRULE2($.expression, {LABEL: "exponent"});
-      $.CONSUME(RParen);
-    });
-
-    // very important to call this after all the rules have been defined.
-    // otherwise the parser may not work correctly as it will lack information
-    // derived during the self analysis phase.
     this.performSelfAnalysis();
   }
+
+  expression = this.RULE("expression", () => {
+    this.SUBRULE(this.additionExpression)
+  });
+
+  additionExpression = this.RULE("additionExpression", () => {
+    this.SUBRULE(this.multiplicationExpression, {LABEL: "lhs"});
+    this.MANY(() => {
+      // consuming 'AdditionOperator' will consume either Plus or Minus as they are subclasses of AdditionOperator
+      this.CONSUME(AdditionOperator);
+      //  the index "2" in SUBRULE2 is needed to identify the unique position in the grammar during runtime
+      this.SUBRULE2(this.multiplicationExpression, {LABEL: "rhs"});
+    });
+  });
+
+  multiplicationExpression = this.RULE("multiplicationExpression", () => {
+    this.SUBRULE(this.atomicExpression, {LABEL: "lhs"});
+    this.MANY(() => {
+      this.CONSUME(MultiplicationOperator);
+      //  the index "2" in SUBRULE2 is needed to identify the unique position in the grammar during runtime
+      this.SUBRULE2(this.atomicExpression, {LABEL: "rhs"});
+    });
+  });
+
+  atomicExpression = this.RULE("atomicExpression", () => this.OR([
+    // parenthesisExpression has the highest precedence and thus it appears
+    // in the "lowest" leaf in the expression ParseTree.
+    {ALT: () => this.SUBRULE(this.parenthesisExpression)},
+    {ALT: () => this.CONSUME(NumberLiteral)},
+    {ALT: () => this.SUBRULE(this.powerFunction)}
+  ]));
+
+  parenthesisExpression = this.RULE('parenthesisExpression', () => {
+    this.CONSUME(LParen);
+    this.SUBRULE(this.expression);
+    this.CONSUME(RParen);
+  });
+
+  powerFunction = this.RULE('powerFunction', () => {
+    this.CONSUME(PowerFunc);
+    this.CONSUME(LParen);
+    this.SUBRULE(this.expression, {LABEL: "base"});
+    this.CONSUME(Comma);
+    this.SUBRULE2(this.expression, {LABEL: "exponent"});
+    this.CONSUME(RParen);
+  })
 }
 
 // wrapping it all together
@@ -112,8 +96,7 @@ const BaseCstVisitor = parser.getBaseCstVisitorConstructor()
 class CalculatorInterpreter extends BaseCstVisitor {
   constructor() {
     super()
-    // This helper will detect any missing or redundant methods on this visitor
-    // this.validateVisitor()
+    this.validateVisitor()
   }
 
   expression(ctx: any) {
@@ -125,7 +108,7 @@ class CalculatorInterpreter extends BaseCstVisitor {
 
     // "rhs" key may be undefined as the grammar defines it as optional (MANY === zero or more).
     if (ctx.rhs) {
-      ctx.rhs.forEach((rhsOperand: any, idx: any) => {
+      ctx.rhs.forEach((rhsOperand: any, idx: number) => {
         // there will be one operator for each rhs operand
         let rhsValue = this.visit(rhsOperand)
         let operator = ctx.AdditionOperator[idx]
