@@ -1,5 +1,8 @@
 import { createToken, CstParser, Lexer, tokenMatcher } from "chevrotain";
 
+import { Range } from "../range";
+import { SheetMatrix, isCell } from "../types";
+
 
 // using the NA pattern marks this Token class as 'irrelevant' for the Lexer.
 // AdditionOperator defines a Tokens hierarchy but only the leafs in this hierarchy define
@@ -19,6 +22,10 @@ const NumberLiteral = createToken({name: "NumberLiteral", pattern: /[1-9]\d*/});
 const PowerFunc = createToken({name: "PowerFunc", pattern: /power/});
 const Comma = createToken({name: "Comma", pattern: /,/});
 
+const char = "([a-zA-Z])+";
+const num = "([0-9])+";
+const Cell = createToken({name: "Cell", pattern: new RegExp(`${char}${num}`)});
+
 // marking WhiteSpace as 'SKIPPED' makes the lexer skip it.
 const WhiteSpace = createToken({
   name: "WhiteSpace",
@@ -26,7 +33,7 @@ const WhiteSpace = createToken({
   group: Lexer.SKIPPED
 });
 
-const allTokens = [WhiteSpace, Plus, Minus, Multi, Div, LParen, RParen, NumberLiteral, AdditionOperator, MultiplicationOperator, PowerFunc, Comma];
+const allTokens = [WhiteSpace, Plus, Minus, Multi, Div, LParen, RParen, NumberLiteral, AdditionOperator, MultiplicationOperator, PowerFunc, Comma, Cell];
 const CalculatorLexer = new Lexer(allTokens);
 
 
@@ -66,6 +73,7 @@ class CalculatorPure extends CstParser {
     // parenthesisExpression has the highest precedence and thus it appears
     // in the "lowest" leaf in the expression ParseTree.
     {ALT: () => this.SUBRULE(this.parenthesisExpression)},
+    {ALT: () => this.CONSUME(Cell)},
     {ALT: () => this.CONSUME(NumberLiteral)},
     {ALT: () => this.SUBRULE(this.powerFunction)}
   ]));
@@ -94,9 +102,11 @@ const parser = new CalculatorPure();
 const BaseCstVisitor = parser.getBaseCstVisitorConstructor()
 
 class CalculatorInterpreter extends BaseCstVisitor {
-  constructor() {
-    super()
-    this.validateVisitor()
+  sheetMatrix: SheetMatrix;
+  constructor(sheetMatrix: SheetMatrix) {
+    super();
+    this.sheetMatrix = sheetMatrix;
+    this.validateVisitor();
   }
 
   expression(ctx: any) {
@@ -153,6 +163,15 @@ class CalculatorInterpreter extends BaseCstVisitor {
       // to passing the array's first element
       return this.visit(ctx.parenthesisExpression)
     }
+    else if (ctx.Cell) {
+      // resolves simple cells
+      // TODO tidy up
+      const cell = Range.resolve(ctx.Cell[0].image, this.sheetMatrix);
+      if (isCell(cell) && (cell.kind === 'float' || cell.kind === 'string')) {
+        return cell.value;
+      }
+      throw new Error('TODO make helpful');
+    }
     else if (ctx.NumberLiteral) {
       // If a key exists on the ctx, at least one element is guaranteed
       return parseInt(ctx.NumberLiteral[0].image, 10)
@@ -177,13 +196,9 @@ class CalculatorInterpreter extends BaseCstVisitor {
 
 
 
-// export const parser = (expression: string) => {
-//   return '';
-// }
-
-const interpreterInstance = new CalculatorInterpreter();
-
-export const process = (inputText: string) => {
+// TODO naming, calc?
+export const process = (inputText: string, sheetMatrix: SheetMatrix) => {
+  const interpreterInstance = new CalculatorInterpreter(sheetMatrix);
   // Lex
   const lexResult = CalculatorLexer.tokenize(inputText)
   parser.input = lexResult.tokens
@@ -198,6 +213,6 @@ export const process = (inputText: string) => {
   }
 
   // Visit
-  const ast = interpreterInstance.visit(cst)
-  return ast
+  const result = interpreterInstance.visit(cst)
+  return result
 }

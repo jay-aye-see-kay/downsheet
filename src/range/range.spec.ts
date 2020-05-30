@@ -1,6 +1,7 @@
 import { strict as a } from "assert"
 
-import { Range, SheetData, Cell } from "./index";
+import { Range } from "./index";
+import { Cell, SheetData, } from "../types";
 
 
 describe('Range module', () => {

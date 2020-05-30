@@ -1,6 +1,6 @@
 import { assertNever } from '../helpers';
 import { fromSb26 } from '../hexavigesimal';
-
+import { Cell, SheetData, SheetMatrix, SheetArray } from "../types";
 
 const char = "([a-zA-Z])+";
 const num = "([0-9])+";
@@ -20,18 +20,6 @@ type RangeKind =
   | "invalid";
 
 
-type CellKind =
-  | 'none'
-  | 'string'
-  | 'int'
-  | 'float'
-  | 'boolean'
-  | 'offset-date-time'
-  | 'date-time'
-  | 'date'
-  | 'time';
-
-
 // Position is a A1/ZA199 syntax string by users
 type Position = string;
 
@@ -40,15 +28,6 @@ type Coord = {
   row: number;
   col: number;
 }
-
-export type Cell = {
-  kind: CellKind;
-  value: any; // TODO
-};
-
-type SheetArray = Cell[];
-type SheetMatrix = Cell[][];
-export type SheetData = SheetMatrix;
 
 class RangeError extends Error {}
 
@@ -111,6 +90,7 @@ const getMatrix = (c1: Coord, c2: Coord, sheetData: SheetData): SheetMatrix => {
 
 export const resolve = (rangeString: string, sheetData: SheetData): Cell | SheetArray | SheetMatrix => {
   const kind = getKind(rangeString);
+  debugger
   switch (kind) {
     case 'invalid':
       throw new RangeError();
