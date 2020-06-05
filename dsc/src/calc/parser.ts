@@ -18,7 +18,7 @@ const Div = createToken({name: "Div", pattern: /\//, categories: MultiplicationO
 const LParen = createToken({name: "LParen", pattern: /\(/});
 const RParen = createToken({name: "RParen", pattern: /\)/});
 const NumberLiteral = createToken({name: "NumberLiteral", pattern: /[1-9]\d*/});
-const StringLiteral = createToken({name: "StringLiteral", pattern: /".*"/});
+const StringLiteral = createToken({name: "StringLiteral", pattern: /\'.+\'/});
 
 const FunctionName = createToken({name: "FunctionName", pattern: /([a-zA-Z])+\(/});
 const Comma = createToken({name: "Comma", pattern: /,/});
@@ -105,28 +105,26 @@ const op = {
   plus: (c1: Cell, c2: Cell): Cell => {
     if (c1.kind === 'float' && c2.kind === 'float') {
       return { kind: 'float', value: c1.value + c2.value }
-    } else if (c1.kind === 'string' && c2.kind === 'string') {
-      return { kind: 'string', value: c1.value + c2.value }
     }
-    throw new Error('Not implemented');
+    throw new Error('This function only works on numbers');
   },
   subtract: (c1: Cell, c2: Cell): Cell => {
     if (c1.kind === 'float' && c2.kind === 'float') {
       return { kind: 'float', value: c1.value - c2.value }
     }
-    throw new Error('Not implemented');
+    throw new Error('This function only works on numbers');
   },
   multiply: (c1: Cell, c2: Cell): Cell => {
     if (c1.kind === 'float' && c2.kind === 'float') {
       return { kind: 'float', value: c1.value * c2.value }
     }
-    throw new Error('Not implemented');
+    throw new Error('This function only works on numbers');
   },
   divide: (c1: Cell, c2: Cell): Cell => {
     if (c1.kind === 'float' && c2.kind === 'float') {
       return { kind: 'float', value: c1.value / c2.value }
     }
-    throw new Error('Not implemented');
+    throw new Error('This function only works on numbers');
   },
 };
 
@@ -154,6 +152,13 @@ const fn = {
       throw new Error('This function only works on numbers');
     });
     return { kind: 'float', value: Math.max(...nums) };
+  },
+  concat: (...args: Cell[]): Cell => {
+    const words = args.map(cell => {
+      if (cell.kind === 'string') return cell.value;
+      throw new Error('This function only works on strings');
+    });
+    return { kind: 'string', value: words.join('') };
   },
 }
 type Fn = keyof typeof fn;

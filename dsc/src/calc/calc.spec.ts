@@ -17,6 +17,7 @@ const cell420: Cell = { kind: 'float', value: 420 };
 const cell1000: Cell = { kind: 'float', value: 1000 };
 const cellWoop: Cell = { kind: 'string', value: 'woop' };
 const cellWoopWoop: Cell = { kind: 'string', value: 'woopwoop' };
+const cellWoopWoopWoop: Cell = { kind: 'string', value: 'woopwoopwoop' };
 
 
 describe('calc parser standalone', () => {
@@ -52,6 +53,8 @@ describe('calc parser with sheet and references', () => {
   it('subtract a number', () => cellEqual(evalFormula('52-A1', sheet), cell10));
   it('square a number', () => cellEqual(evalFormula('power(A2, 2)', sheet), cell100));
   it('cube a number', () => cellEqual(evalFormula('power(A2, 3)', sheet), cell1000));
-  // concat a string (TODO maybe use a concat fn instead of +)
-  it('concat two strings', () => cellEqual(evalFormula('B1+"woop"', sheet), cellWoopWoop));
+  // concat a string
+  it('concat a string (no change)', () => cellEqual(evalFormula('concat(B1)', sheet), cellWoop));
+  it('concat two strings', () => cellEqual(evalFormula("concat(B1, 'woop')", sheet), cellWoopWoop));
+  it('concat three strings', () => cellEqual(evalFormula("concat(B1, 'woop', B2)", sheet), cellWoopWoopWoop));
 });
