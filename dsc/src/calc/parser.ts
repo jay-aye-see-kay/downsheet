@@ -20,7 +20,7 @@ const RParen = createToken({name: "RParen", pattern: /\)/});
 const NumberLiteral = createToken({name: "NumberLiteral", pattern: /[1-9]\d*/});
 const StringLiteral = createToken({name: "StringLiteral", pattern: /".*"/});
 
-const PowerFunc = createToken({name: "PowerFunc", pattern: /power/});
+const FunctionName = createToken({name: "FunctionName", pattern: /([a-zA-Z])+\(/});
 const Comma = createToken({name: "Comma", pattern: /,/});
 
 const char = "([a-zA-Z])+";
@@ -34,7 +34,7 @@ const WhiteSpace = createToken({
   group: Lexer.SKIPPED
 });
 
-const allTokens = [WhiteSpace, Plus, Minus, Multi, Div, LParen, RParen, NumberLiteral, StringLiteral, AdditionOperator, MultiplicationOperator, PowerFunc, Comma, RCell];
+const allTokens = [WhiteSpace, Plus, Minus, Multi, Div, LParen, RParen, NumberLiteral, StringLiteral, AdditionOperator, MultiplicationOperator, FunctionName, Comma, RCell];
 const CalculatorLexer = new Lexer(allTokens);
 
 
@@ -77,7 +77,7 @@ class CalculatorPure extends CstParser {
     {ALT: () => this.CONSUME(RCell)},
     {ALT: () => this.CONSUME(NumberLiteral)},
     {ALT: () => this.CONSUME(StringLiteral)},
-    {ALT: () => this.SUBRULE(this.powerFunction)}
+    {ALT: () => this.SUBRULE(this.functionExpression)}
   ]));
 
   parenthesisExpression = this.RULE('parenthesisExpression', () => {
@@ -86,12 +86,12 @@ class CalculatorPure extends CstParser {
     this.CONSUME(RParen);
   });
 
-  powerFunction = this.RULE('powerFunction', () => {
-    this.CONSUME(PowerFunc);
-    this.CONSUME(LParen);
-    this.SUBRULE(this.expression, {LABEL: "base"});
-    this.CONSUME(Comma);
-    this.SUBRULE2(this.expression, {LABEL: "exponent"});
+  functionExpression = this.RULE('functionExpression', () => {
+    this.CONSUME(FunctionName);
+    this.MANY_SEP({
+      SEP: Comma,
+      DEF: () => this.SUBRULE(this.expression, {LABEL: "args"}),
+    });
     this.CONSUME(RParen);
   })
 }
@@ -131,13 +131,32 @@ const op = {
 };
 
 const fn = {
-  power: (base: Cell, exp: Cell): Cell => {
+  power: (...args: Cell[]): Cell => {
+    if (args.length !== 2) {
+      throw new Error('power fn needs exactly two arguments');
+    }
+    const [base, exp] = args;
     if (base.kind === 'float' && exp.kind === 'float') {
       return { kind: 'float', value: Math.pow(base.value, exp.value) }
     }
     throw new Error('Not implemented');
-  }
+  },
+  min: (...args: Cell[]): Cell => {
+    const nums = args.map(cell => {
+      if (cell.kind === 'float') return cell.value;
+      throw new Error('This function only works on numbers');
+    });
+    return { kind: 'float', value: Math.min(...nums) };
+  },
+  max: (...args: Cell[]): Cell => {
+    const nums = args.map(cell => {
+      if (cell.kind === 'float') return cell.value;
+      throw new Error('This function only works on numbers');
+    });
+    return { kind: 'float', value: Math.max(...nums) };
+  },
 }
+type Fn = keyof typeof fn;
 
  // ----------------- Interpreter -----------------
 const BaseCstVisitor = parser.getBaseCstVisitorConstructor()
@@ -222,8 +241,8 @@ class CalculatorInterpreter extends BaseCstVisitor {
       const withoutQuotes = withQuotes.substring(1, withQuotes.length-1);
       return { kind: 'string', value: withoutQuotes };
     }
-    else if (ctx.powerFunction) {
-      return this.visit(ctx.powerFunction)
+    else if (ctx.functionExpression) {
+      return this.visit(ctx.functionExpression)
     }
   }
 
@@ -233,10 +252,11 @@ class CalculatorInterpreter extends BaseCstVisitor {
     return this.visit(ctx.expression)
   }
 
-  powerFunction(ctx: any) {
-    const base = this.visit(ctx.base);
-    const exponent = this.visit(ctx.exponent);
-    return fn.power(base, exponent)
+  functionExpression(ctx: any) {
+    const tokenName = ctx.FunctionName[0].image;
+    const fnName: Fn = tokenName.substring(0, tokenName.length - 1);
+    const args = ctx.args.map((arg: any) => this.visit(arg))
+    return fn[fnName](...args)
   }
 }
 
