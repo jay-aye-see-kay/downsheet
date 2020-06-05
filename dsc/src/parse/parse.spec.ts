@@ -100,17 +100,17 @@ describe('Parse module', () => {
 
     it('should parse an identity matrix', () => {
       const sheet = `data = [ [ 0, 1 ], [ 1, 0 ] ]`;
-      const expected = [[c0,c1],[c1,c0]];
+      const expected = { data: [[c0,c1],[c1,c0]] };
       a.deepEqual(parse(sheet), expected);
     });
     it('should pad out to a rectange', () => {
       const sheet = `data = [ [ 's' ], [ 0, 0, 0 ] ]`;
-      const expected = [[cs,cn,cn],[c0,c0,c0]];
+      const expected = { data: [[cs,cn,cn],[c0,c0,c0]] };
       a.deepEqual(parse(sheet), expected);
     });
     it('should treat \'\' as none', () => {
       const sheet = `data = [ [ '' ] ]`;
-      const expected = [[cn]];
+      const expected = { data: [[cn]] };
       a.deepEqual(parse(sheet), expected);
     });
   });

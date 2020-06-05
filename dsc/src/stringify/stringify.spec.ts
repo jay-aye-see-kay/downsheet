@@ -1,6 +1,6 @@
 import { strict as a } from "assert"
 
-import { Cell, SheetData } from "../types";
+import { Cell, SheetFile } from "../types";
 import { stringify } from "./index";
 
 const cn: Cell = { kind: 'none' };
@@ -8,10 +8,10 @@ const c0: Cell = { kind: 'float', value: 0 };
 const c1: Cell = { kind: 'float', value: 1 };
 const cs: Cell = { kind: 'string', value: 'FooBar' };
 
-const sheets: Record<string, SheetData> = {
-  oneSquare: [ [cn] ],
-  identity: [ [c1,c0], [c0,c1] ],
-  mixedWidths: [ [cs,cn,cn], [c0,cs,c0], [c1,c1,cs] ],
+const sheets: Record<string, SheetFile> = {
+  oneSquare: { data: [ [cn] ] },
+  identity: { data: [ [c1,c0], [c0,c1] ] },
+  mixedWidths: { data: [ [cs,cn,cn], [c0,cs,c0], [c1,c1,cs] ] },
 };
 
 const expected = {

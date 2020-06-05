@@ -10,7 +10,7 @@ import {
   LocalDate,
   LocalTime,
 } from '../types';
-import { Cell, SheetData } from '../types';
+import { Cell, SheetFile } from '../types';
 
 
 type ParsedCell =
@@ -51,18 +51,24 @@ export const convertCell = (cell: ParsedCell): Cell => {
   }
 }
 
-export const parse = (dsString: string): SheetData => {
+export const parse = (dsString: string): SheetFile => {
   const asJson = Toml.parse(dsString);
-  const data = asJson.data as ParsedCell[][]; // FIXME io-ts or something
+  const formula = asJson.formula as Record<string, string>; // FIXME io-ts or something
+  const unpaddedData = asJson.data as ParsedCell[][]; // FIXME io-ts or something
 
-  const sheetWidth = Math.max(...data.map(row => row.length));
+  const sheetWidth = Math.max(...unpaddedData.map(row => row.length));
 
-  const sheetData = data.map(row => {
+  const data = unpaddedData.map(row => {
     while (row.length < sheetWidth) {
       row.push('');
     }
     return row.map(c => convertCell(c));
   });
 
-  return sheetData;
+  const sheetFile: SheetFile = { data };
+  if (formula) {
+    sheetFile.formula = formula;
+  }
+
+  return sheetFile;
 }

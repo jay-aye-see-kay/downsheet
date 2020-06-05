@@ -1,4 +1,4 @@
-import { Cell, SheetData } from '../types';
+import { Cell, SheetFile } from '../types';
 import { assertNever } from '../helpers';
 import { toSb26 } from '../hexavigesimal';
 
@@ -49,14 +49,25 @@ const makeTopLabels = (columnWidths: number[]): string => {
   return `${labelRow}\n`;
 }
 
-export const stringify = (sheetData: SheetData): string => {
-  const dataAsStringGrid = sheetData.map(
+export const stringify = (sheetFile: SheetFile): string => {
+  // stringify formula
+  let formulaString = '';
+  if (sheetFile.formula) {
+    formulaString += '[formula]\n';
+    Object.entries(sheetFile.formula).forEach(([formulaRange, formulaValue]) => {
+      formulaString += `${formulaRange} = ${formulaValue}`;
+    });
+    formulaString += '\n\n';
+  }
+
+  // stringify data
+  const dataAsStringGrid = sheetFile.data.map(
     row => row.map(cell => cellToString(cell))
   );
 
   const columnWidths = getColumnWidths(dataAsStringGrid);
-  let outString = "data = [\n";
-  outString += makeTopLabels(columnWidths);
+  let dataString = "data = [\n";
+  dataString += makeTopLabels(columnWidths);
   dataAsStringGrid.forEach((row, rowIdx) => {
     const rowAsString = row.map((cellStr, cellIdx) => {
       const width = columnWidths[cellIdx];
@@ -64,7 +75,9 @@ export const stringify = (sheetData: SheetData): string => {
       const isLast = cellIdx === row.length - 1;
       return isLast ? `${cellStr}${padding}` : `${cellStr},${padding}`;
     }).join(" ");
-    outString += `  [ ${rowAsString } ], # ${rowIdx + 1}\n`;
+    dataString += `  [ ${rowAsString } ], # ${rowIdx + 1}\n`;
   });
-outString += "]\n"; return outString;
+dataString += "]\n";
+
+return formulaString + dataString;
 }

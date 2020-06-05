@@ -79,6 +79,11 @@ export type SheetArray = Cell[];
 export type SheetMatrix = Cell[][];
 // same as matrix but represents all the data
 export type SheetData = SheetMatrix;
+// the parsed file data
+export type SheetFile = {
+  formula?: Record<string, string>;
+  data: SheetMatrix;
+};
 
 export type RangeIO = Cell | SheetArray | SheetMatrix;
 
