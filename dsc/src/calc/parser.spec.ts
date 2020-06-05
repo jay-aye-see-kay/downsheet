@@ -1,14 +1,22 @@
 import { strict as a } from "assert"
 
+import { cellEqual } from '../testHelpers';
 import { process } from './parser';
+import { Cell } from "../types";
+
+const cell2: Cell = { kind: 'float', value: 2 }
+const cell6: Cell = { kind: 'float', value: 6 }
+const cell9: Cell = { kind: 'float', value: 9 }
+const cell10: Cell = { kind: 'float', value: 10 }
+const cell25: Cell = { kind: 'float', value: 25 }
 
 describe('calc parser', () => {
   // basic operators
-  it('should calc 1+1', () => a.equal(process('1+1', []), 2));
-  it('should calc 10-1', () => a.equal(process('10-1', []), 9));
-  it('should calc 5*5', () => a.equal(process('5*5', []), 25));
-  it('should calc 125/5', () => a.equal(process('125/5', []), 25));
-  // operator precedence
-  it('should calc 1+1*5', () => a.equal(process('1+1*5', []), 6));
-  it('should calc (1+1)*5', () => a.equal(process('(1+1)*5', []), 10));
+  it('should calc 1+1', () => cellEqual(process('1+1', []), cell2));
+  it('should calc 10-1', () => cellEqual(process('10-1', []), cell9));
+  it('should calc 5*5', () => cellEqual(process('5*5', []), cell25));
+  it('should calc 125/5', () => cellEqual(process('125/5', []), cell25));
+  // // operator precedence
+  it('should calc 1+1*5', () => cellEqual(process('1+1*5', []), cell6));
+  it('should calc (1+1)*5', () => cellEqual(process('(1+1)*5', []), cell10));
 });

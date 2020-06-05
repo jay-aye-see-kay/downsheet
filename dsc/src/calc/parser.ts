@@ -1,7 +1,7 @@
 import { createToken, CstParser, Lexer, tokenMatcher } from "chevrotain";
 
 import { Range } from "../range";
-import { SheetMatrix, isCell } from "../types";
+import { SheetMatrix, Cell, isCell } from "../types";
 
 
 // using the NA pattern marks this Token class as 'irrelevant' for the Lexer.
@@ -18,13 +18,14 @@ const Div = createToken({name: "Div", pattern: /\//, categories: MultiplicationO
 const LParen = createToken({name: "LParen", pattern: /\(/});
 const RParen = createToken({name: "RParen", pattern: /\)/});
 const NumberLiteral = createToken({name: "NumberLiteral", pattern: /[1-9]\d*/});
+const StringLiteral = createToken({name: "StringLiteral", pattern: /".*"/});
 
 const PowerFunc = createToken({name: "PowerFunc", pattern: /power/});
 const Comma = createToken({name: "Comma", pattern: /,/});
 
 const char = "([a-zA-Z])+";
 const num = "([0-9])+";
-const Cell = createToken({name: "Cell", pattern: new RegExp(`${char}${num}`)});
+const RCell = createToken({name: "Cell", pattern: new RegExp(`${char}${num}`)});
 
 // marking WhiteSpace as 'SKIPPED' makes the lexer skip it.
 const WhiteSpace = createToken({
@@ -33,7 +34,7 @@ const WhiteSpace = createToken({
   group: Lexer.SKIPPED
 });
 
-const allTokens = [WhiteSpace, Plus, Minus, Multi, Div, LParen, RParen, NumberLiteral, AdditionOperator, MultiplicationOperator, PowerFunc, Comma, Cell];
+const allTokens = [WhiteSpace, Plus, Minus, Multi, Div, LParen, RParen, NumberLiteral, StringLiteral, AdditionOperator, MultiplicationOperator, PowerFunc, Comma, RCell];
 const CalculatorLexer = new Lexer(allTokens);
 
 
@@ -73,8 +74,9 @@ class CalculatorPure extends CstParser {
     // parenthesisExpression has the highest precedence and thus it appears
     // in the "lowest" leaf in the expression ParseTree.
     {ALT: () => this.SUBRULE(this.parenthesisExpression)},
-    {ALT: () => this.CONSUME(Cell)},
+    {ALT: () => this.CONSUME(RCell)},
     {ALT: () => this.CONSUME(NumberLiteral)},
+    {ALT: () => this.CONSUME(StringLiteral)},
     {ALT: () => this.SUBRULE(this.powerFunction)}
   ]));
 
@@ -98,6 +100,45 @@ class CalculatorPure extends CstParser {
 // reuse the same parser instance.
 const parser = new CalculatorPure();
 
+// A mini cell math module, TODO put it somewhere
+const op = {
+  plus: (c1: Cell, c2: Cell): Cell => {
+    if (c1.kind === 'float' && c2.kind === 'float') {
+      return { kind: 'float', value: c1.value + c2.value }
+    } else if (c1.kind === 'string' && c2.kind === 'string') {
+      return { kind: 'string', value: c1.value + c2.value }
+    }
+    throw new Error('Not implemented');
+  },
+  subtract: (c1: Cell, c2: Cell): Cell => {
+    if (c1.kind === 'float' && c2.kind === 'float') {
+      return { kind: 'float', value: c1.value - c2.value }
+    }
+    throw new Error('Not implemented');
+  },
+  multiply: (c1: Cell, c2: Cell): Cell => {
+    if (c1.kind === 'float' && c2.kind === 'float') {
+      return { kind: 'float', value: c1.value * c2.value }
+    }
+    throw new Error('Not implemented');
+  },
+  divide: (c1: Cell, c2: Cell): Cell => {
+    if (c1.kind === 'float' && c2.kind === 'float') {
+      return { kind: 'float', value: c1.value / c2.value }
+    }
+    throw new Error('Not implemented');
+  },
+};
+
+const fn = {
+  power: (base: Cell, exp: Cell): Cell => {
+    if (base.kind === 'float' && exp.kind === 'float') {
+      return { kind: 'float', value: Math.pow(base.value, exp.value) }
+    }
+    throw new Error('Not implemented');
+  }
+}
+
  // ----------------- Interpreter -----------------
 const BaseCstVisitor = parser.getBaseCstVisitorConstructor()
 
@@ -113,7 +154,7 @@ class CalculatorInterpreter extends BaseCstVisitor {
     return this.visit(ctx.additionExpression)
   }
 
-  additionExpression(ctx: any) {
+  additionExpression(ctx: any)  {
     let result = this.visit(ctx.lhs)
 
     // "rhs" key may be undefined as the grammar defines it as optional (MANY === zero or more).
@@ -121,13 +162,13 @@ class CalculatorInterpreter extends BaseCstVisitor {
       ctx.rhs.forEach((rhsOperand: any, idx: number) => {
         // there will be one operator for each rhs operand
         let rhsValue = this.visit(rhsOperand)
+
         let operator = ctx.AdditionOperator[idx]
 
         if (tokenMatcher(operator, Plus)) {
-          result += rhsValue
+          result = op.plus(result, rhsValue)
         } else {
-          // Minus
-          result -= rhsValue
+          result = op.subtract(result, rhsValue)
         }
       })
     }
@@ -146,10 +187,9 @@ class CalculatorInterpreter extends BaseCstVisitor {
         let operator = ctx.MultiplicationOperator[idx]
 
         if (tokenMatcher(operator, Multi)) {
-          result *= rhsValue
+          result = op.multiply(result, rhsValue)
         } else {
-          // Division
-          result /= rhsValue
+          result = op.divide(result, rhsValue)
         }
       })
     }
@@ -168,13 +208,19 @@ class CalculatorInterpreter extends BaseCstVisitor {
       // TODO tidy up
       const cell = Range.resolve(ctx.Cell[0].image, this.sheetMatrix);
       if (isCell(cell) && (cell.kind === 'float' || cell.kind === 'string')) {
-        return cell.value;
+        return cell;
       }
       throw new Error('TODO make helpful');
     }
     else if (ctx.NumberLiteral) {
       // If a key exists on the ctx, at least one element is guaranteed
-      return parseInt(ctx.NumberLiteral[0].image, 10)
+      const value = parseInt(ctx.NumberLiteral[0].image, 10)
+      return { kind: 'float', value };
+    }
+    else if (ctx.StringLiteral) {
+      const withQuotes = ctx.StringLiteral[0].image;
+      const withoutQuotes = withQuotes.substring(1, withQuotes.length-1);
+      return { kind: 'string', value: withoutQuotes };
     }
     else if (ctx.powerFunction) {
       return this.visit(ctx.powerFunction)
@@ -190,14 +236,13 @@ class CalculatorInterpreter extends BaseCstVisitor {
   powerFunction(ctx: any) {
     const base = this.visit(ctx.base);
     const exponent = this.visit(ctx.exponent);
-    return Math.pow(base, exponent)
+    return fn.power(base, exponent)
   }
 }
 
 
-
-// TODO naming, calc?
-export const process = (inputText: string, sheetMatrix: SheetMatrix) => {
+// processes a single formula and returns it's result as a Cell
+export const process = (inputText: string, sheetMatrix: SheetMatrix): Cell => {
   const interpreterInstance = new CalculatorInterpreter(sheetMatrix);
   // Lex
   const lexResult = CalculatorLexer.tokenize(inputText)
