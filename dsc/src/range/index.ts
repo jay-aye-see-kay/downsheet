@@ -90,7 +90,6 @@ const getMatrix = (c1: Coord, c2: Coord, sheetData: SheetData): SheetMatrix => {
 
 export const resolve = (rangeString: string, sheetData: SheetData): Cell | SheetArray | SheetMatrix => {
   const kind = getKind(rangeString);
-  debugger
   switch (kind) {
     case 'invalid':
       throw new RangeError();

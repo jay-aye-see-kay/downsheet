@@ -1,4 +1,5 @@
 import * as fs from 'fs';
 
-export { stringify } from './stringify';
+export { calc } from './calc';
 export { parse } from './parse';
+export { stringify } from './stringify';

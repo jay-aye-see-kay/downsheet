@@ -2,7 +2,7 @@ import { strict as a } from "assert"
 import * as fs from 'fs';
 import * as path from 'path';
 
-import { stringify, parse } from '../index';
+import { stringify, calc, parse } from '../index';
 
 
 const testsPath = path.join(__dirname, './test-files');
@@ -20,7 +20,7 @@ describe('e2e formating tests', () => {
       a.ok(testInputPath);
       const inputString = fs.readFileSync(testInputPath, 'utf8');
 
-      const result = stringify(parse(inputString));
+      const result = stringify(calc(parse(inputString)));
       a.equal(result, expected);
     });
   });

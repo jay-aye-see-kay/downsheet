@@ -1,7 +1,7 @@
 import { strict as a } from "assert"
 
 import { cellEqual } from '../testHelpers';
-import { process } from './parser';
+import { evalFormula } from './parser';
 import { Cell, SheetMatrix } from '../types';
 
 const cell10: Cell = { kind: 'float', value: 10 };
@@ -21,15 +21,15 @@ const sheet: SheetMatrix = [
 
 describe('resolve and interpret', () => {
   // basic resolution
-  it('resolve a number', () => cellEqual(process('A1', sheet), cell42));
-  it('resolve a string', () => cellEqual(process('B1', sheet), cellWoop));
+  it('resolve a number', () => cellEqual(evalFormula('A1', sheet), cell42));
+  it('resolve a string', () => cellEqual(evalFormula('B1', sheet), cellWoop));
   // basic math operators
-  it('resolve and add two numbers', () => cellEqual(process('A1+A2', sheet), cell52));
-  it('resolve one number and add to it', () => cellEqual(process('A1+57', sheet), cell99));
-  it('multiply two numbers', () => cellEqual(process('A1*10', sheet), cell420));
-  it('subtract a number', () => cellEqual(process('52-A1', sheet), cell10));
-  it('square a number', () => cellEqual(process('power(A2, 2)', sheet), cell100));
-  it('cube a number', () => cellEqual(process('power(A2, 3)', sheet), cell1000));
+  it('resolve and add two numbers', () => cellEqual(evalFormula('A1+A2', sheet), cell52));
+  it('resolve one number and add to it', () => cellEqual(evalFormula('A1+57', sheet), cell99));
+  it('multiply two numbers', () => cellEqual(evalFormula('A1*10', sheet), cell420));
+  it('subtract a number', () => cellEqual(evalFormula('52-A1', sheet), cell10));
+  it('square a number', () => cellEqual(evalFormula('power(A2, 2)', sheet), cell100));
+  it('cube a number', () => cellEqual(evalFormula('power(A2, 3)', sheet), cell1000));
   // concat a string (TODO maybe use a concat fn instead of +)
-  it('concat two strings', () => cellEqual(process('B1+"woop"', sheet), cellWoopWoop));
+  it('concat two strings', () => cellEqual(evalFormula('B1+"woop"', sheet), cellWoopWoop));
 });

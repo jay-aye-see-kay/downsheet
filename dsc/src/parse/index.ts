@@ -28,7 +28,6 @@ export const convertCell = (cell: ParsedCell): Cell => {
 
   } else if (cell instanceof Date && isLocalTime(cell)) {
     return { kind: 'time', value: cell };
-
   } else if (cell instanceof Date && isLocalDate(cell)) {
     return { kind: 'date', value: cell };
 

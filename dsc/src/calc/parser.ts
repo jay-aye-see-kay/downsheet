@@ -240,9 +240,8 @@ class CalculatorInterpreter extends BaseCstVisitor {
   }
 }
 
-
 // processes a single formula and returns it's result as a Cell
-export const process = (inputText: string, sheetMatrix: SheetMatrix): Cell => {
+export const evalFormula = (inputText: string, sheetMatrix: SheetMatrix): Cell => {
   const interpreterInstance = new CalculatorInterpreter(sheetMatrix);
   // Lex
   const lexResult = CalculatorLexer.tokenize(inputText)

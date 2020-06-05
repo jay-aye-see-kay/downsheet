@@ -53,11 +53,11 @@ export const stringify = (sheetFile: SheetFile): string => {
   // stringify formula
   let formulaString = '';
   if (sheetFile.formula) {
-    formulaString += '[formula]\n';
+    formulaString += '\n[formula]\n';
     Object.entries(sheetFile.formula).forEach(([formulaRange, formulaValue]) => {
-      formulaString += `${formulaRange} = ${formulaValue}`;
+      formulaString += `${formulaRange} = "${formulaValue}"\n`;
     });
-    formulaString += '\n\n';
+    formulaString += '';
   }
 
   // stringify data
@@ -79,5 +79,5 @@ export const stringify = (sheetFile: SheetFile): string => {
   });
 dataString += "]\n";
 
-return formulaString + dataString;
+return dataString + formulaString;
 }
