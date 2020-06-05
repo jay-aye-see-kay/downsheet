@@ -2,13 +2,12 @@
 
 var fs = require('fs');
 
-var stringify = require('./lib/stringify').stringify;
-var parse = require('./lib/parse').parse;
+var { stringify, parse, calc } = require('./lib');
 
 var stdinBuffer = fs.readFileSync(0); // STDIN_FILENO = 0
 var unformatted = stdinBuffer.toString();
 
 if (unformatted) {
-  var formatted = stringify(parse(unformatted));
+  var formatted = stringify(calc(parse(unformatted)));
   process.stdout.write(formatted);
 }
