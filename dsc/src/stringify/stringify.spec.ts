@@ -15,18 +15,21 @@ const sheets: Record<string, SheetFile> = {
 };
 
 const expected = {
-  oneSquare: `data = [
+  oneSquare: `[data]
+grid = [
   # A
   [ "" ], # 1
 ]
 `,
-  identity: `data = [
+  identity: `[data]
+grid = [
   # A  B
   [ 1, 0 ], # 1
   [ 0, 1 ], # 2
 ]
 `,
-  mixedWidths: `data = [
+  mixedWidths: `[data]
+grid = [
   # A         B         C
   [ "FooBar", "",       ""       ], # 1
   [ 0,        "FooBar", 0        ], # 2

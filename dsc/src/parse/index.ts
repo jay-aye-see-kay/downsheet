@@ -51,9 +51,9 @@ export const convertCell = (cell: ParsedCell): Cell => {
 }
 
 export const parse = (dsString: string): SheetFile => {
-  const asJson = Toml.parse(dsString);
+  const asJson: any = Toml.parse(dsString);
   const formula = asJson.formula as Record<string, string>; // FIXME io-ts or something
-  const unpaddedData = asJson.data as ParsedCell[][]; // FIXME io-ts or something
+  const unpaddedData = asJson.data.grid as ParsedCell[][]; // FIXME io-ts or something
 
   const sheetWidth = Math.max(...unpaddedData.map(row => row.length));
 

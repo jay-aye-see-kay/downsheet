@@ -53,11 +53,11 @@ export const stringify = (sheetFile: SheetFile): string => {
   // stringify formula
   let formulaString = '';
   if (sheetFile.formula) {
-    formulaString += '\n[formula]\n';
+    formulaString += '[formula]\n';
     Object.entries(sheetFile.formula).forEach(([formulaRange, formulaValue]) => {
       formulaString += `${formulaRange} = "${formulaValue}"\n`;
     });
-    formulaString += '';
+    formulaString += '\n';
   }
 
   // stringify data
@@ -66,7 +66,7 @@ export const stringify = (sheetFile: SheetFile): string => {
   );
 
   const columnWidths = getColumnWidths(dataAsStringGrid);
-  let dataString = "data = [\n";
+  let dataString = "[data]\ngrid = [\n";
   dataString += makeTopLabels(columnWidths);
   dataAsStringGrid.forEach((row, rowIdx) => {
     const rowAsString = row.map((cellStr, cellIdx) => {
@@ -77,7 +77,7 @@ export const stringify = (sheetFile: SheetFile): string => {
     }).join(" ");
     dataString += `  [ ${rowAsString } ], # ${rowIdx + 1}\n`;
   });
-dataString += "]\n";
+  dataString += "]\n";
 
-return dataString + formulaString;
+  return formulaString + dataString;
 }
