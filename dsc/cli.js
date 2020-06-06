@@ -2,7 +2,7 @@
 
 var fs = require('fs');
 
-var { stringify, parse, calc } = require('./lib');
+var { stringify, parse, calc } = require('./build');
 
 var stdinBuffer = fs.readFileSync(0); // STDIN_FILENO = 0
 var unformatted = stdinBuffer.toString();
