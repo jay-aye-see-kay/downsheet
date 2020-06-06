@@ -2,14 +2,14 @@ import { strict as a } from "assert"
 import * as fs from 'fs';
 import * as path from 'path';
 
-import { stringify, calc, parse } from '../index';
+import { stringify, calc, parse } from '../src';
 
 
-const testsPath = path.join(__dirname, './test-files');
+const testsPath = path.join(__dirname, './testFiles');
 const tests = fs.readdirSync(testsPath);
 
 
-describe('e2e formating tests', () => {
+describe('e2e tests', () => {
   tests.forEach(testName => {
     it(testName, () => {
       const expectedPath = path.join(testsPath, testName, 'out.dsh');
