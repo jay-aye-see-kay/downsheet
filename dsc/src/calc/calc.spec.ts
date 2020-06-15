@@ -8,9 +8,12 @@ const cell2: Cell = { kind: 'float', value: 2 }
 const cell6: Cell = { kind: 'float', value: 6 }
 const cell9: Cell = { kind: 'float', value: 9 }
 const cell10: Cell = { kind: 'float', value: 10 };
+const cell20: Cell = { kind: 'float', value: 20 }
 const cell25: Cell = { kind: 'float', value: 25 }
+const cell40: Cell = { kind: 'float', value: 40 };
 const cell42: Cell = { kind: 'float', value: 42 };
 const cell52: Cell = { kind: 'float', value: 52 };
+const cell72: Cell = { kind: 'float', value: 72 };
 const cell99: Cell = { kind: 'float', value: 99 };
 const cell100: Cell = { kind: 'float', value: 100 };
 const cell420: Cell = { kind: 'float', value: 420 };
@@ -38,8 +41,11 @@ describe('calc parser standalone', () => {
 });
 
 const sheet: SheetMatrix = [
-  [cell42, cellWoop],
-  [cell10, cellWoop],
+// A       B
+  [cell42, cellWoop], // 1
+  [cell10, cellWoop], // 2
+  [cell10, cell10  ], // 3
+  [cell10, cell10  ], // 4
 ]
 
 describe('calc parser with sheet and references', () => {
@@ -53,8 +59,14 @@ describe('calc parser with sheet and references', () => {
   it('subtract a number', () => cellEqual(evalFormula('52-A1', sheet), cell10));
   it('square a number', () => cellEqual(evalFormula('power(A2, 2)', sheet), cell100));
   it('cube a number', () => cellEqual(evalFormula('power(A2, 3)', sheet), cell1000));
+  // sum a range
+  it('sum a row', () => cellEqual(evalFormula("sum(3:3)", sheet), cell20));
+  it('sum 2 rows', () => cellEqual(evalFormula("sum(3:4)", sheet), cell40));
+  it('sum a column', () => cellEqual(evalFormula("sum(A:A)", sheet), cell72));
+  it('sum a range', () => cellEqual(evalFormula("sum(A3:B4)", sheet), cell40));
   // concat a string
   it('concat a string (no change)', () => cellEqual(evalFormula('concat(B1)', sheet), cellWoop));
   it('concat two strings', () => cellEqual(evalFormula("concat(B1, 'woop')", sheet), cellWoopWoop));
   it('concat three strings', () => cellEqual(evalFormula("concat(B1, 'woop', B2)", sheet), cellWoopWoopWoop));
+  it('concat a range', () => cellEqual(evalFormula("concat(B1:B2)", sheet), cellWoopWoop));
 });

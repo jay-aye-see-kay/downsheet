@@ -25,7 +25,10 @@ const Comma = createToken({name: "Comma", pattern: /,/});
 
 const char = "([a-zA-Z])+";
 const num = "([0-9])+";
-const RCell = createToken({name: "Cell", pattern: new RegExp(`${char}${num}`)});
+const CellToken = createToken({name: "Cell", pattern: new RegExp(`${char}${num}`)});
+const ColToken = createToken({name: "Col", pattern: new RegExp(`${char}:${char}`)});
+const RowToken = createToken({name: "Row", pattern: new RegExp(`${num}:${num}`)});
+const RangeToken = createToken({name: "Range", pattern: new RegExp(`${char}${num}:${char}${num}`)});
 
 // marking WhiteSpace as 'SKIPPED' makes the lexer skip it.
 const WhiteSpace = createToken({
@@ -34,7 +37,25 @@ const WhiteSpace = createToken({
   group: Lexer.SKIPPED
 });
 
-const allTokens = [WhiteSpace, Plus, Minus, Multi, Div, LParen, RParen, NumberLiteral, StringLiteral, AdditionOperator, MultiplicationOperator, FunctionName, Comma, RCell];
+const allTokens = [
+  WhiteSpace,
+  Plus,
+  Minus,
+  Multi,
+  Div,
+  LParen,
+  RParen,
+  RangeToken,
+  CellToken,
+  ColToken,
+  RowToken,
+  NumberLiteral,
+  StringLiteral,
+  AdditionOperator,
+  MultiplicationOperator,
+  FunctionName,
+  Comma,
+];
 const CalculatorLexer = new Lexer(allTokens);
 
 
@@ -74,7 +95,10 @@ class CalculatorPure extends CstParser {
     // parenthesisExpression has the highest precedence and thus it appears
     // in the "lowest" leaf in the expression ParseTree.
     {ALT: () => this.SUBRULE(this.parenthesisExpression)},
-    {ALT: () => this.CONSUME(RCell)},
+    {ALT: () => this.CONSUME(CellToken)},
+    {ALT: () => this.CONSUME(RowToken)},
+    {ALT: () => this.CONSUME(ColToken)},
+    {ALT: () => this.CONSUME(RangeToken)},
     {ALT: () => this.CONSUME(NumberLiteral)},
     {ALT: () => this.CONSUME(StringLiteral)},
     {ALT: () => this.SUBRULE(this.functionExpression)}
@@ -137,7 +161,7 @@ const fn = {
     if (base.kind === 'float' && exp.kind === 'float') {
       return { kind: 'float', value: Math.pow(base.value, exp.value) }
     }
-    throw new Error('Not implemented');
+    throw new Error('This function only works on numbers');
   },
   min: (...args: Cell[]): Cell => {
     const nums = args.map(cell => {
@@ -152,6 +176,13 @@ const fn = {
       throw new Error('This function only works on numbers');
     });
     return { kind: 'float', value: Math.max(...nums) };
+  },
+  sum: (...args: Cell[]): Cell => {
+    const nums = args.map(cell => {
+      if (cell.kind === 'float') return cell.value;
+      throw new Error('This function only works on numbers');
+    });
+    return { kind: 'float', value: nums.reduce((sum, n) => sum + n) };
   },
   concat: (...args: Cell[]): Cell => {
     const words = args.map(cell => {
@@ -228,13 +259,16 @@ class CalculatorInterpreter extends BaseCstVisitor {
       return this.visit(ctx.parenthesisExpression)
     }
     else if (ctx.Cell) {
-      // resolves simple cells
-      // TODO tidy up
-      const cell = Range.resolve(ctx.Cell[0].image, this.sheetMatrix);
-      if (isCell(cell) && (cell.kind === 'float' || cell.kind === 'string')) {
-        return cell;
-      }
-      throw new Error('TODO make helpful');
+      return Range.resolve(ctx.Cell[0].image, this.sheetMatrix);
+    }
+    else if (ctx.Row) {
+      return Range.resolve(ctx.Row[0].image, this.sheetMatrix);
+    }
+    else if (ctx.Col) {
+      return Range.resolve(ctx.Col[0].image, this.sheetMatrix);
+    }
+    else if (ctx.Range) {
+      return Range.resolve(ctx.Range[0].image, this.sheetMatrix);
     }
     else if (ctx.NumberLiteral) {
       // If a key exists on the ctx, at least one element is guaranteed
@@ -260,8 +294,8 @@ class CalculatorInterpreter extends BaseCstVisitor {
   functionExpression(ctx: any) {
     const tokenName = ctx.FunctionName[0].image;
     const fnName: Fn = tokenName.substring(0, tokenName.length - 1);
-    const args = ctx.args.map((arg: any) => this.visit(arg))
-    return fn[fnName](...args)
+    const args: Cell[] | Cell[][] | Cell[][][] = ctx.args.map((arg: any) => this.visit(arg))
+    return fn[fnName](...args.flat(2))
   }
 }
 
