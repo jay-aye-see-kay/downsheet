@@ -294,8 +294,9 @@ class CalculatorInterpreter extends BaseCstVisitor {
   functionExpression(ctx: any) {
     const tokenName = ctx.FunctionName[0].image;
     const fnName: Fn = tokenName.substring(0, tokenName.length - 1);
-    const args: Cell[] | Cell[][] | Cell[][][] = ctx.args.map((arg: any) => this.visit(arg))
-    return fn[fnName](...args.flat(2))
+    const rawArgs: Cell[] | Cell[][] | Cell[][][] = ctx.args.map((arg: any) => this.visit(arg));
+    const args = rawArgs.flat(2).filter((cell: Cell) => cell.kind !== "none");
+    return fn[fnName](...args);
   }
 }
 
