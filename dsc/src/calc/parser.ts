@@ -17,7 +17,7 @@ const Div = createToken({name: "Div", pattern: /\//, categories: MultiplicationO
 
 const LParen = createToken({name: "LParen", pattern: /\(/});
 const RParen = createToken({name: "RParen", pattern: /\)/});
-const NumberLiteral = createToken({name: "NumberLiteral", pattern: /[1-9]\d*/});
+const NumberLiteral = createToken({name: "NumberLiteral", pattern: /\d+(\.\d+)?/});
 const StringLiteral = createToken({name: "StringLiteral", pattern: /\'.+\'/});
 
 const FunctionName = createToken({name: "FunctionName", pattern: /([a-zA-Z])+\(/});
@@ -272,7 +272,7 @@ class CalculatorInterpreter extends BaseCstVisitor {
     }
     else if (ctx.NumberLiteral) {
       // If a key exists on the ctx, at least one element is guaranteed
-      const value = parseInt(ctx.NumberLiteral[0].image, 10)
+      const value = parseFloat(ctx.NumberLiteral[0].image)
       return { kind: 'float', value };
     }
     else if (ctx.StringLiteral) {
