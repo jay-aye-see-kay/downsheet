@@ -12,7 +12,7 @@ const tests = fs.readdirSync(testsPath);
 describe('e2e tests', () => {
   tests.forEach(testName => {
     it(testName, () => {
-      const expectedPath = path.join(testsPath, testName, 'out.dsh');
+      const expectedPath = path.join(testsPath, testName, 'out.toml');
       a.ok(expectedPath);
       const expected = fs.readFileSync(expectedPath, 'utf8');
 
