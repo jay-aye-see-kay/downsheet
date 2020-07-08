@@ -16,11 +16,11 @@
   "license": "ISC",
   "devDependencies": {
     "@types/mocha": "^7.0.2",
-    "@types/node": "^13.13.5",
-    "mocha": "^7.1.2",
-    "nodemon": "^2.0.3",
-    "ts-node": "^8.10.1",
-    "typescript": "^3.8.3"
+    "@types/node": "^14.0.19",
+    "mocha": "^8.0.1",
+    "nodemon": "^2.0.4",
+    "ts-node": "^8.10.2",
+    "typescript": "^3.9.6"
   },
   "dependencies": {
     "@iarna/toml": "^3.0.0",
