@@ -52,6 +52,7 @@ export const convertCell = (cell: ParsedCell): Cell => {
 
 export const parse = (dsString: string): SheetFile => {
   const asJson: any = Toml.parse(dsString);
+  const labels = asJson.labels as Record<string, string>; // FIXME io-ts or something
   const formula = asJson.formula as Record<string, string>; // FIXME io-ts or something
   const unpaddedData = asJson.data.grid as ParsedCell[][]; // FIXME io-ts or something
 
@@ -65,6 +66,9 @@ export const parse = (dsString: string): SheetFile => {
   });
 
   const sheetFile: SheetFile = { data };
+  if (labels) {
+    sheetFile.labels = labels;
+  }
   if (formula) {
     sheetFile.formula = formula;
   }

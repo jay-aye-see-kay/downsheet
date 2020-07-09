@@ -50,6 +50,16 @@ const makeTopLabels = (columnWidths: number[]): string => {
 }
 
 export const stringify = (sheetFile: SheetFile): string => {
+  // stringify labels
+  let labelsString = '';
+  if (sheetFile.labels) {
+    labelsString += '[labels]\n';
+    Object.entries(sheetFile.labels).forEach(([labelRange, labelValue]) => {
+      labelsString += `${labelRange} = "${labelValue}"\n`;
+    });
+    labelsString += '\n';
+  }
+
   // stringify formula
   let formulaString = '';
   if (sheetFile.formula) {
@@ -79,5 +89,5 @@ export const stringify = (sheetFile: SheetFile): string => {
   });
   dataString += "]\n";
 
-  return formulaString + dataString;
+  return labelsString + formulaString + dataString;
 }

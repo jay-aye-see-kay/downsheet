@@ -1,0 +1,11 @@
+[labels]
+SUM = "C1"
+
+[formula]
+SUM = "A1+B1"
+
+[data]
+grid = [
+  # A  B  C
+  [ 9, 9, 18 ], # 1
+]

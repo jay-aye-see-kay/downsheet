@@ -18,7 +18,25 @@ export const calc = (sheetFile: SheetFile): SheetFile => {
   if (!sheetFile.formula) return sheetFile;
 
   const newSheetFile = { ...sheetFile, data: sheetFile.data };
-  Object.entries(sheetFile.formula).forEach(([formulaRange, formulaValue]) => {
+
+  // TODO what if there's a label that's also a valid range, which gets precedence?
+  // TODO maybe I should make labels uppercase only to avoid collisions with fn names?
+
+  if (sheetFile.labels && sheetFile.formula) {
+    // dumb find and replace of labels
+    const newFormula: SheetFile['formula'] = {};
+    Object.entries(sheetFile.formula).forEach(([formulaRange, formulaValue]) => {
+      Object.entries(sheetFile.labels!).forEach(([labelKey, labelValue]) => {
+        const newFormulaRange = formulaRange.replace(new RegExp(labelKey, 'g'), labelValue);
+        const newFormulaValue = formulaValue.replace(new RegExp(labelKey, 'g'), labelValue);
+        newFormula[newFormulaRange] = newFormulaValue;
+      })
+    })
+    // put the substituted formula into the new file
+    newSheetFile.formula = newFormula;
+  }
+
+  Object.entries(newSheetFile.formula!).forEach(([formulaRange, formulaValue]) => {
     // range to position, error if not cell range
     const pos = Range.positionToCoord(formulaRange);
 
@@ -26,6 +44,9 @@ export const calc = (sheetFile: SheetFile): SheetFile => {
     const outputValue = evalFormula(formulaValue, newSheetFile.data);
     newSheetFile.data[pos.row][pos.col] = outputValue;
   });
+
+  // put the un-substituted formula back so that gets written to file
+  newSheetFile.formula = sheetFile.formula;
 
   return newSheetFile;
 };

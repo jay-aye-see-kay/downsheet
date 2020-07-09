@@ -82,6 +82,7 @@ export type SheetData = SheetMatrix;
 // the parsed file data
 export type SheetFile = {
   formula?: Record<string, string>;
+  labels?: Record<string, string>;
   data: SheetMatrix;
 };
 
