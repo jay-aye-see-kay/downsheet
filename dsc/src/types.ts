@@ -1,8 +1,8 @@
 // more accurate types for working with @iarna/toml results
-export interface OffsetDateTime extends Date {};
-export interface LocalDateTime extends Date { isFloating: true };
-export interface LocalDate extends Date { isDate: true };
-export interface LocalTime extends Date { isTime: true };
+export type OffsetDateTime = Date;
+export interface LocalDateTime extends Date { isFloating: true }
+export interface LocalDate extends Date { isDate: true }
+export interface LocalTime extends Date { isTime: true }
 
 export const isOffsetDateTime = (date: Date): date is OffsetDateTime =>
   !(date as LocalDateTime).isFloating &&
@@ -52,7 +52,7 @@ type TimeCell = {
   value: LocalTime;
 };
 
-export type Cell = 
+export type Cell =
   | NoneCell
   | StringCell
   | FloatCell
