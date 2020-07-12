@@ -85,7 +85,7 @@ export const toSb26 = (num: number): string => {
 
   // TODO figure out the general formula for this
   throw new Error('column positions must be 17601 (ZZZ) or less');
-}
+};
 
 export const fromSb26 = (sb26: string): number => {
   // calculate missing numbers because there is no 0 in spreadsheet base 26
@@ -99,4 +99,4 @@ export const fromSb26 = (sb26: string): number => {
   const with0AsFirst = sb26.split('').map(char => mapATo0.get(char)).join('');
   return parseInt(with0AsFirst, BASE) + missingNumbers;
 
-}
+};

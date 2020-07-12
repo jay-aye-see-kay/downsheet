@@ -1,4 +1,4 @@
-import { strict as a } from "assert"
+import { strict as a } from "assert";
 import Toml from '@iarna/toml';
 
 import { parse, convertCell } from './index';

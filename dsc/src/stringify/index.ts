@@ -24,7 +24,7 @@ export const cellToString = (cell: Cell): string => {
       assertNever(cell);
       throw new Error();
   }
-}
+};
 
 const getColumnWidths = (stringMatix: string[][]) => {
   const columnMaxWidths = [];
@@ -36,7 +36,7 @@ const getColumnWidths = (stringMatix: string[][]) => {
     columnMaxWidths.push(Math.max(...columnWidths));
   }
   return columnMaxWidths;
-}
+};
 
 const makeTopLabels = (columnWidths: number[]): string => {
   const labels = columnWidths.map((width, colIdx) => {
@@ -44,10 +44,10 @@ const makeTopLabels = (columnWidths: number[]): string => {
     const padding = " ".repeat(width - letter.length);
     const isLast = colIdx === columnWidths.length - 1;
     return isLast ? ` ${letter}` : ` ${letter}${padding}`;
-  })
-  const labelRow = "  #" + labels.join(' ');;
+  });
+  const labelRow = "  #" + labels.join(' ');
   return `${labelRow}\n`;
-}
+};
 
 export const stringify = (sheetFile: SheetFile): string => {
   // stringify labels
@@ -90,4 +90,4 @@ export const stringify = (sheetFile: SheetFile): string => {
   dataString += "]\n";
 
   return labelsString + formulaString + dataString;
-}
+};

@@ -1,7 +1,7 @@
 import { createToken, CstParser, Lexer, tokenMatcher } from "chevrotain";
 
 import { Range } from "../range";
-import { SheetMatrix, Cell, isCell } from "../types";
+import { SheetMatrix, Cell } from "../types";
 
 
 // using the NA pattern marks this Token class as 'irrelevant' for the Lexer.
@@ -18,7 +18,7 @@ const Div = createToken({name: "Div", pattern: /\//, categories: MultiplicationO
 const LParen = createToken({name: "LParen", pattern: /\(/});
 const RParen = createToken({name: "RParen", pattern: /\)/});
 const NumberLiteral = createToken({name: "NumberLiteral", pattern: /\d+(\.\d+)?/});
-const StringLiteral = createToken({name: "StringLiteral", pattern: /\'.+\'/});
+const StringLiteral = createToken({name: "StringLiteral", pattern: /'.+'/});
 
 const FunctionName = createToken({name: "FunctionName", pattern: /([a-zA-Z])+\(/});
 const Comma = createToken({name: "Comma", pattern: /,/});
@@ -69,7 +69,7 @@ class CalculatorPure extends CstParser {
   }
 
   expression = this.RULE("expression", () => {
-    this.SUBRULE(this.additionExpression)
+    this.SUBRULE(this.additionExpression);
   });
 
   additionExpression = this.RULE("additionExpression", () => {
@@ -117,7 +117,7 @@ class CalculatorPure extends CstParser {
       DEF: () => this.SUBRULE(this.expression, {LABEL: "args"}),
     });
     this.CONSUME(RParen);
-  })
+  });
 }
 
 // wrapping it all together
@@ -128,25 +128,25 @@ const parser = new CalculatorPure();
 const op = {
   plus: (c1: Cell, c2: Cell): Cell => {
     if (c1.kind === 'float' && c2.kind === 'float') {
-      return { kind: 'float', value: c1.value + c2.value }
+      return { kind: 'float', value: c1.value + c2.value };
     }
     throw new Error('This function only works on numbers');
   },
   subtract: (c1: Cell, c2: Cell): Cell => {
     if (c1.kind === 'float' && c2.kind === 'float') {
-      return { kind: 'float', value: c1.value - c2.value }
+      return { kind: 'float', value: c1.value - c2.value };
     }
     throw new Error('This function only works on numbers');
   },
   multiply: (c1: Cell, c2: Cell): Cell => {
     if (c1.kind === 'float' && c2.kind === 'float') {
-      return { kind: 'float', value: c1.value * c2.value }
+      return { kind: 'float', value: c1.value * c2.value };
     }
     throw new Error('This function only works on numbers');
   },
   divide: (c1: Cell, c2: Cell): Cell => {
     if (c1.kind === 'float' && c2.kind === 'float') {
-      return { kind: 'float', value: c1.value / c2.value }
+      return { kind: 'float', value: c1.value / c2.value };
     }
     throw new Error('This function only works on numbers');
   },
@@ -159,7 +159,7 @@ const fn = {
     }
     const [base, exp] = args;
     if (base.kind === 'float' && exp.kind === 'float') {
-      return { kind: 'float', value: Math.pow(base.value, exp.value) }
+      return { kind: 'float', value: Math.pow(base.value, exp.value) };
     }
     throw new Error('This function only works on numbers');
   },
@@ -191,11 +191,11 @@ const fn = {
     });
     return { kind: 'string', value: words.join('') };
   },
-}
+};
 type Fn = keyof typeof fn;
 
- // ----------------- Interpreter -----------------
-const BaseCstVisitor = parser.getBaseCstVisitorConstructor()
+// ----------------- Interpreter -----------------
+const BaseCstVisitor = parser.getBaseCstVisitorConstructor();
 
 class CalculatorInterpreter extends BaseCstVisitor {
   sheetMatrix: SheetMatrix;
@@ -206,57 +206,57 @@ class CalculatorInterpreter extends BaseCstVisitor {
   }
 
   expression(ctx: any) {
-    return this.visit(ctx.additionExpression)
+    return this.visit(ctx.additionExpression);
   }
 
   additionExpression(ctx: any)  {
-    let result = this.visit(ctx.lhs)
+    let result = this.visit(ctx.lhs);
 
     // "rhs" key may be undefined as the grammar defines it as optional (MANY === zero or more).
     if (ctx.rhs) {
       ctx.rhs.forEach((rhsOperand: any, idx: number) => {
         // there will be one operator for each rhs operand
-        let rhsValue = this.visit(rhsOperand)
+        const rhsValue = this.visit(rhsOperand);
 
-        let operator = ctx.AdditionOperator[idx]
+        const operator = ctx.AdditionOperator[idx];
 
         if (tokenMatcher(operator, Plus)) {
-          result = op.plus(result, rhsValue)
+          result = op.plus(result, rhsValue);
         } else {
-          result = op.subtract(result, rhsValue)
+          result = op.subtract(result, rhsValue);
         }
-      })
+      });
     }
 
-    return result
+    return result;
   }
 
   multiplicationExpression(ctx: any) {
-    let result = this.visit(ctx.lhs)
+    let result = this.visit(ctx.lhs);
 
     // "rhs" key may be undefined as the grammar defines it as optional (MANY === zero or more).
     if (ctx.rhs) {
       ctx.rhs.forEach((rhsOperand: any, idx: any) => {
         // there will be one operator for each rhs operand
-        let rhsValue = this.visit(rhsOperand)
-        let operator = ctx.MultiplicationOperator[idx]
+        const rhsValue = this.visit(rhsOperand);
+        const operator = ctx.MultiplicationOperator[idx];
 
         if (tokenMatcher(operator, Multi)) {
-          result = op.multiply(result, rhsValue)
+          result = op.multiply(result, rhsValue);
         } else {
-          result = op.divide(result, rhsValue)
+          result = op.divide(result, rhsValue);
         }
-      })
+      });
     }
 
-    return result
+    return result;
   }
 
   atomicExpression(ctx: any) {
     if (ctx.parenthesisExpression) {
       // passing an array to "this.visit" is equivalent
       // to passing the array's first element
-      return this.visit(ctx.parenthesisExpression)
+      return this.visit(ctx.parenthesisExpression);
     }
     else if (ctx.Cell) {
       return Range.resolve(ctx.Cell[0].image, this.sheetMatrix);
@@ -272,7 +272,7 @@ class CalculatorInterpreter extends BaseCstVisitor {
     }
     else if (ctx.NumberLiteral) {
       // If a key exists on the ctx, at least one element is guaranteed
-      const value = parseFloat(ctx.NumberLiteral[0].image)
+      const value = parseFloat(ctx.NumberLiteral[0].image);
       return { kind: 'float', value };
     }
     else if (ctx.StringLiteral) {
@@ -281,14 +281,14 @@ class CalculatorInterpreter extends BaseCstVisitor {
       return { kind: 'string', value: withoutQuotes };
     }
     else if (ctx.functionExpression) {
-      return this.visit(ctx.functionExpression)
+      return this.visit(ctx.functionExpression);
     }
   }
 
   parenthesisExpression(ctx: any) {
     // The ctx will also contain the parenthesis tokens, but we don't care about those
     // in the context of calculating the result.
-    return this.visit(ctx.expression)
+    return this.visit(ctx.expression);
   }
 
   functionExpression(ctx: any) {
@@ -304,19 +304,19 @@ class CalculatorInterpreter extends BaseCstVisitor {
 export const evalFormula = (inputText: string, sheetMatrix: SheetMatrix): Cell => {
   const interpreterInstance = new CalculatorInterpreter(sheetMatrix);
   // Lex
-  const lexResult = CalculatorLexer.tokenize(inputText)
-  parser.input = lexResult.tokens
+  const lexResult = CalculatorLexer.tokenize(inputText);
+  parser.input = lexResult.tokens;
 
   // Automatic CST created when parsing
-  const cst = parser.expression()
+  const cst = parser.expression();
   if (parser.errors.length > 0) {
     throw Error(
       "Sad sad panda, parsing errors detected!\n" +
         parser.errors[0].message
-    )
+    );
   }
 
   // Visit
-  const result = interpreterInstance.visit(cst)
-  return result
-}
+  const result = interpreterInstance.visit(cst);
+  return result;
+};

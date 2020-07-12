@@ -27,7 +27,7 @@ type Position = string;
 type Coord = {
   row: number;
   col: number;
-}
+};
 
 class RangeError extends Error {}
 
@@ -38,7 +38,7 @@ const getKind = (rangeString: string): RangeKind => {
   if (valid.row.test(rangeString))    return 'row';
   if (valid.column.test(rangeString)) return 'column';
   return 'invalid';
-}
+};
 
 const positionToCoord = (position: Position): Coord => {
   const columnMatches = position.match(/[a-zA-Z]+/);
@@ -52,7 +52,7 @@ const positionToCoord = (position: Position): Coord => {
     : 0;
 
   return { row: rowIndex, col: columnIndex };
-}
+};
 
 const rowToCoords = (rangeString: string, sheetData: SheetData): [Coord, Coord] => {
   const [row1, row2] = rangeString.split(':');
@@ -63,7 +63,7 @@ const rowToCoords = (rangeString: string, sheetData: SheetData): [Coord, Coord] 
     { row: rowIndex1, col: 0 },
     { row: rowIndex2, col: lastColIndex },
   ];
-}
+};
 
 const colToCoords = (rangeString: string, sheetData: SheetData): [Coord, Coord] => {
   const [col1, col2] = rangeString.split(':');
@@ -74,7 +74,7 @@ const colToCoords = (rangeString: string, sheetData: SheetData): [Coord, Coord] 
     { row: 0, col: colIndex1 },
     { row: lastRowIndex, col: colIndex2 },
   ];
-}
+};
 
 const getMatrix = (c1: Coord, c2: Coord, sheetData: SheetData): SheetMatrix => {
   const [rMin, rMax] = [c1.row, c2.row].sort();
@@ -86,7 +86,7 @@ const getMatrix = (c1: Coord, c2: Coord, sheetData: SheetData): SheetMatrix => {
     row.slice(cMin, cMax + 1)
   );
   return slicedData;
-}
+};
 
 export const resolve = (rangeString: string, sheetData: SheetData): Cell | SheetArray | SheetMatrix => {
   const kind = getKind(rangeString);
@@ -125,14 +125,14 @@ export const resolve = (rangeString: string, sheetData: SheetData): Cell | Sheet
       } else if (isSingleCol(matrix)) {
         return matrix.map(row => row[0]);
       }
-      return matrix
+      return matrix;
     }
 
     default:
       assertNever(kind);
       throw new Error();
   }
-}
+};
 
 const isSingleRow = (matrix: SheetMatrix): boolean => matrix.length === 1;
 const isSingleCol = (matrix: SheetMatrix): boolean => matrix[0].length === 1;

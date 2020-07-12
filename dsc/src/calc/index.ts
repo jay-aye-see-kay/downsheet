@@ -1,13 +1,4 @@
-import {
-  Cell,
-  RangeIO,
-  SheetArray,
-  SheetMatrix,
-  SheetFile,
-  isCell,
-  isSheetArray,
-  isSheetMatrix,
-} from '../types';
+import { SheetFile } from '../types';
 
 import { evalFormula } from './parser';
 import { Range } from "../range";
@@ -25,25 +16,30 @@ export const calc = (sheetFile: SheetFile): SheetFile => {
   if (sheetFile.labels && sheetFile.formula) {
     // dumb find and replace of labels
     const newFormula: SheetFile['formula'] = {};
-    Object.entries(sheetFile.formula).forEach(([formulaRange, formulaValue]) => {
-      Object.entries(sheetFile.labels!).forEach(([labelKey, labelValue]) => {
+    const oldFormula = Object.entries(sheetFile.formula);
+    const oldLabels = Object.entries(sheetFile.labels);
+
+    for (const [formulaRange, formulaValue] of oldFormula) {
+      for (const [labelKey, labelValue] of oldLabels) {
         const newFormulaRange = formulaRange.replace(new RegExp(labelKey, 'g'), labelValue);
         const newFormulaValue = formulaValue.replace(new RegExp(labelKey, 'g'), labelValue);
         newFormula[newFormulaRange] = newFormulaValue;
-      })
-    })
+      }
+    }
     // put the substituted formula into the new file
     newSheetFile.formula = newFormula;
   }
 
-  Object.entries(newSheetFile.formula!).forEach(([formulaRange, formulaValue]) => {
-    // range to position, error if not cell range
-    const pos = Range.positionToCoord(formulaRange);
+  if (newSheetFile.formula) {
+    Object.entries(newSheetFile.formula).forEach(([formulaRange, formulaValue]) => {
+      // range to position, error if not cell range
+      const pos = Range.positionToCoord(formulaRange);
 
-    // calc value and put in new sheetFile.data
-    const outputValue = evalFormula(formulaValue, newSheetFile.data);
-    newSheetFile.data[pos.row][pos.col] = outputValue;
-  });
+      // calc value and put in new sheetFile.data
+      const outputValue = evalFormula(formulaValue, newSheetFile.data);
+      newSheetFile.data[pos.row][pos.col] = outputValue;
+    });
+  }
 
   // put the un-substituted formula back so that gets written to file
   newSheetFile.formula = sheetFile.formula;

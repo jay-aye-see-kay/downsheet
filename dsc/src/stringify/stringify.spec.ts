@@ -1,4 +1,4 @@
-import { strict as a } from "assert"
+import { strict as a } from "assert";
 
 import { Cell, SheetFile } from "../types";
 import { stringify } from "./index";

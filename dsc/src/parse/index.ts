@@ -24,7 +24,7 @@ type ParsedCell =
 
 export const convertCell = (cell: ParsedCell): Cell => {
   if (cell === '') {
-    return { kind: 'none' }
+    return { kind: 'none' };
 
   } else if (cell instanceof Date && isLocalTime(cell)) {
     return { kind: 'time', value: cell };
@@ -48,7 +48,7 @@ export const convertCell = (cell: ParsedCell): Cell => {
     case 'number':
       return { kind: 'float', value: cell };
   }
-}
+};
 
 export const parse = (dsString: string): SheetFile => {
   const asJson: any = Toml.parse(dsString);
@@ -74,4 +74,4 @@ export const parse = (dsString: string): SheetFile => {
   }
 
   return sheetFile;
-}
+};

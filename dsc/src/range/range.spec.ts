@@ -1,4 +1,4 @@
-import { strict as a } from "assert"
+import { strict as a } from "assert";
 
 import { Range } from "./index";
 import { Cell, SheetData, } from "../types";

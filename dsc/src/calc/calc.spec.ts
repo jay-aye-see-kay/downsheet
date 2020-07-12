@@ -1,8 +1,6 @@
-import { strict as a } from "assert"
-
 import { cellEqual, mkc } from '../testHelpers';
 import { evalFormula } from './parser';
-import { Cell, SheetMatrix } from '../types';
+import { SheetMatrix } from '../types';
 
 
 describe('calc parser standalone', () => {
@@ -30,7 +28,7 @@ const sheet: SheetMatrix = [
   [mkc(10), mkc("woop")], // 2
   [mkc(10), mkc(10)    ], // 3
   [mkc(10), mkc(10)    ], // 4
-]
+];
 
 describe('calc parser with sheet and references', () => {
   // basic resolution

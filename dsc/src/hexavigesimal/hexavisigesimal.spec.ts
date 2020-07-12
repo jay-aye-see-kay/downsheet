@@ -1,4 +1,4 @@
-import { strict as a } from "assert"
+import { strict as a } from "assert";
 
 import { fromSb26, toSb26 } from './index';
 
@@ -22,7 +22,7 @@ describe('hexavisigesimal conversion', () => {
   describe('toSb26()', () => {
     Object.entries(knownValues).forEach(([sb26, decimal]) => {
       it(`should convert ${decimal} to ${sb26}`, () => {
-        a.equal(toSb26(decimal), sb26)
+        a.equal(toSb26(decimal), sb26);
       });
     });
   });
@@ -30,7 +30,7 @@ describe('hexavisigesimal conversion', () => {
   describe('fromSb26()', () => {
     Object.entries(knownValues).forEach(([sb26, decimal]) => {
       it(`should convert ${sb26} to ${decimal}`, () => {
-        a.equal(fromSb26(sb26), decimal)
+        a.equal(fromSb26(sb26), decimal);
       });
     });
   });

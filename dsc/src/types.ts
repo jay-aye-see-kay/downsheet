@@ -71,7 +71,7 @@ export type Position = string;
 export type Coord = {
   row: number;
   col: number;
-}
+};
 
 // 1d array of cells
 export type SheetArray = Cell[];
