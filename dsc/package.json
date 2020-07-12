@@ -6,7 +6,7 @@
   "scripts": {
     "start": "ts-node ./src/index.ts",
     "test": "mocha",
-    "lint": "eslint src/**.ts",
+    "lint": "eslint --ext .ts ./src",
     "devBuild": "tsc -p . && sudo npm link"
   },
   "bin": {

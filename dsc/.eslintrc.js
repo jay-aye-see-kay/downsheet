@@ -20,5 +20,10 @@ module.exports = {
   'plugins': [
     '@typescript-eslint',
   ],
-  'rules': {},
+  'rules': {
+    'semi': 'error',
+    '@typescript-eslint/semi': 'error',
+    '@typescript-eslint/indent': ['error', 2],
+    '@typescript-eslint/no-explicit-any': 'off',
+  },
 }
