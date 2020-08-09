@@ -44,7 +44,9 @@ export const calc = (sheetFile: SheetFile): SheetFile => {
     // dumb find and replace of labels
     const newFormula: SheetFile['formula'] = {};
     const formulaPairs = Object.entries(sheetFile.formula);
-    const labelPairs = Object.entries(labels);
+    const labelPairs = Object.entries(labels)
+      // sort so longest go first and we don't replace substrings
+      .sort((p0, p1) => p1[0].length - p0[0].length);
 
     for (const [formulaRange, formulaValue] of formulaPairs) {
       let newFormulaRange = formulaRange;
@@ -57,6 +59,7 @@ export const calc = (sheetFile: SheetFile): SheetFile => {
       }
       newFormula[newFormulaRange] = newFormulaValue;
     }
+
     // put the substituted formula into the new file
     newSheetFile.formula = newFormula;
   }

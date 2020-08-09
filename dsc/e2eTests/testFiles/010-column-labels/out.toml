@@ -1,0 +1,18 @@
+[labels]
+scores = "A:A"
+ages = "B:B"
+
+[formula]
+total_scores = "sum(scores)"
+total_age = "sum(ages)"
+avg_age = "total_age/5"
+
+[data]
+grid = [
+  # A  B   C                D
+  [ 5, 25, "total_scores:", 22   ], # 1
+  [ 1, 21, "total_age:",    108  ], # 2
+  [ 3, 23, "avg_age:",      21.6 ], # 3
+  [ 4, 20, "",              ""   ], # 4
+  [ 9, 19, "",              ""   ], # 5
+]
