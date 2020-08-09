@@ -1,0 +1,10 @@
+[formula]
+sum = "val1+val2"
+
+[data]
+grid = [
+  # A        B
+  [ "val1:", 9  ], # 1
+  [ "val2:", 9  ], # 2
+  [ "sum:",  18 ], # 3
+]
