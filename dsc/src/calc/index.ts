@@ -11,7 +11,8 @@ export const calc = (sheetFile: SheetFile): SheetFile => {
   const newSheetFile = { ...sheetFile, data: sheetFile.data };
 
   // TODO what if there's a label that's also a valid range, which gets precedence?
-  // TODO maybe I should make labels uppercase only to avoid collisions with fn names?
+  // - I should probably just ignore labels that match the isRange regex
+  // - and put a warning in too, one day obvs
 
   if (sheetFile.labels && sheetFile.formula) {
     // dumb find and replace of labels
@@ -21,8 +22,10 @@ export const calc = (sheetFile: SheetFile): SheetFile => {
 
     for (const [formulaRange, formulaValue] of oldFormula) {
       for (const [labelKey, labelValue] of oldLabels) {
-        const newFormulaRange = formulaRange.replace(new RegExp(labelKey, 'g'), labelValue);
-        const newFormulaValue = formulaValue.replace(new RegExp(labelKey, 'g'), labelValue);
+        // ignore matches followed by an open bracket, those are functions
+        // TODO write tests
+        const newFormulaRange = formulaRange.replace(new RegExp(labelKey + '(?!\\()', 'g'), labelValue);
+        const newFormulaValue = formulaValue.replace(new RegExp(labelKey + '(?!\\()', 'g'), labelValue);
         newFormula[newFormulaRange] = newFormulaValue;
       }
     }
