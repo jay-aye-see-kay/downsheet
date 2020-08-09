@@ -158,10 +158,10 @@ const fn = {
       throw new Error('power fn needs exactly two arguments');
     }
     const [base, exp] = args;
-    if (base.kind === 'float' && exp.kind === 'float') {
-      return { kind: 'float', value: Math.pow(base.value, exp.value) };
+    if (base.kind !== 'float' || exp.kind !== 'float') {
+      throw new Error('This function only works on numbers');
     }
-    throw new Error('This function only works on numbers');
+    return { kind: 'float', value: Math.pow(base.value, exp.value) };
   },
   min: (...args: Cell[]): Cell => {
     const nums = args.map(cell => {
@@ -190,6 +190,9 @@ const fn = {
       throw new Error('This function only works on strings');
     });
     return { kind: 'string', value: words.join('') };
+  },
+  count: (...args: Cell[]): Cell => {
+    return { kind: 'float', value: args.length };
   },
 };
 type Fn = keyof typeof fn;

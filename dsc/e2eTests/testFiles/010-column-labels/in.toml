@@ -4,14 +4,13 @@ ages = "B:B"
 
 [formula]
 total_scores = "sum(scores)"
-total_age = "sum(ages)"
-avg_age = "total_age/5"
+avg_age = "sum(ages)/count(ages)"
 
 [data]
 grid = [
   [ 5, 25, "total_scores:", "" ],
-  [ 1, 21, "total_age:",    "" ],
-  [ 3, 23, "avg_age:" ],
+  [ 1, 21, "avg_age:", "" ],
+  [ 3, 23 ],
   [ 4, 20 ],
   [ 9, 19 ],
 ]
